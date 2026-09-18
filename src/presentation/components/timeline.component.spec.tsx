@@ -1,5 +1,5 @@
 import React, {ReactNode} from 'react';
-import {act, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import {when} from 'jest-when';
 import {TimelineComponent} from 'src/presentation/components/timeline.component';
 import {ViewModelsContext} from 'src/presentation/context/view-model.context';
@@ -121,6 +121,62 @@ describe('TimelineComponent', () => {
         expect(screen.queryByText('12')).toBeNull();
     });
 
+    it('should draw the minute axis so a position can be read', async () => {
+        // Act
+        await renderComponent();
+
+        // Assert
+        const ruler = document.querySelector('.dnc-timeline-ruler');
+        expect(Array.from(ruler?.children ?? []).map(mark => mark.textContent))
+            .toEqual(['0', '10', '20', '30', '40', '50']);
+    });
+
+    it('should mark the current time on today, on the row that holds it', async () => {
+        // Arrange
+        jest.useFakeTimers().setSystemTime(new Date(2023, 9, 2, 10, 30).getTime());
+
+        // Act
+        await renderComponent();
+
+        // Assert
+        const mark = screen.getByLabelText('현재 시각 10:30');
+        expect(mark.style.left).toBe('50%');
+        expect(screen.queryAllByLabelText(/현재 시각/)).toHaveLength(1);
+        jest.useRealTimers();
+    });
+
+    it('should not mark the current time on a day that is not today', async () => {
+        // Arrange
+        jest.useFakeTimers().setSystemTime(new Date(2023, 9, 2, 10, 30).getTime());
+        when(mockTimelineViewModel.loadDay).mockResolvedValue({
+            mode: TimelineMode.Actual,
+            day: {...day([]), today: false},
+            error: null,
+        });
+
+        // Act
+        await renderComponent();
+
+        // Assert
+        expect(screen.queryAllByLabelText(/현재 시각/)).toHaveLength(0);
+        jest.useRealTimers();
+    });
+
+    it('should name whatever the pointer is on, including a piece that carries no name', async () => {
+        // Arrange
+        when(mockTimelineViewModel.loadDay).mockResolvedValue(column([item('At home', 9, 11)]));
+        await renderComponent();
+        const pieces = screen.getAllByLabelText(/^At home/);
+
+        // Act
+        await act(async () => {
+            fireEvent.mouseEnter(pieces[1]);
+        });
+
+        // Assert
+        expect(screen.getByText('At home · 09:00–11:00')).toBeTruthy();
+    });
+
     it('should name a record on the row it starts on and not on the rows it continues into', async () => {
         // Arrange
         when(mockTimelineViewModel.loadDay).mockResolvedValue(column([item('At home', 9, 11)]));
@@ -130,7 +186,7 @@ describe('TimelineComponent', () => {
 
         // Assert
         expect(screen.getAllByText('At home')).toHaveLength(1);
-        expect(screen.getAllByTitle(/^At home/)).toHaveLength(2);
+        expect(screen.getAllByLabelText(/^At home/)).toHaveLength(2);
     });
 
     it('should show why a side could not be read instead of an empty grid', async () => {

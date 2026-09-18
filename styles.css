@@ -233,10 +233,38 @@
 }
 
 /* The hour is its own column, the records fill the rest of the width. */
+.dnc-timeline-head,
 .dnc-timeline-grid {
     display: grid;
     grid-template-columns: 2em 1fr;
     gap: 1px;
+}
+
+/* What the pointer is on, named in full. A continued piece carries no name of its
+   own, so this is how you tell one apart. */
+.dnc-timeline-detail {
+    margin: 0 0 0.2em;
+    padding: 0.1em 0.2em;
+    min-height: 1.4em;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The minute axis, named once at the top. The ten-minute marks inside the rows were
+   drawn but had nothing to be read against. */
+.dnc-timeline-ruler {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    font-size: var(--font-ui-smaller);
+    color: var(--text-faint);
+    line-height: 1.4;
+}
+
+.dnc-timeline-ruler > span {
+    padding-left: 1px;
 }
 
 .dnc-timeline-error {
@@ -255,30 +283,45 @@
     line-height: var(--dnc-timeline-row-height);
 }
 
+/* An hour is a row, and left to right across a cell is that hour's sixty minutes.
+   The ten-minute gridlines are the background itself, so they cost no elements. */
 .dnc-timeline-cell {
     position: relative;
     display: block;
     height: var(--dnc-timeline-row-height);
     background-color: var(--background-secondary);
+    background-image: repeating-linear-gradient(
+        to right,
+        var(--background-modifier-border) 0 1px,
+        transparent 1px calc(100% / 6)
+    );
     border-radius: 2px;
 }
 
-/* An hour is a row, and left to right across a cell is that hour's sixty minutes. */
 .dnc-timeline-block {
     position: absolute;
+    box-shadow: none;
+    border: none;
+    padding: 0;
     overflow: hidden;
     min-width: 2px;
     border-radius: 2px;
     font-size: var(--font-ui-smaller);
     line-height: 1;
+    text-align: left;
     white-space: nowrap;
+    cursor: default;
     color: var(--text-on-accent);
     background-color: var(--color-base-50);
 }
 
 .dnc-timeline-block strong {
     font-weight: var(--font-normal);
-    padding: 0 0.2em;
+    padding: 0 0.25em;
+}
+
+.dnc-timeline-block:hover {
+    filter: brightness(1.12);
 }
 
 .dnc-timeline-block.home { background-color: var(--color-green); }
@@ -290,4 +333,14 @@
 
 .dnc-timeline-block.active {
     outline: 1px solid var(--text-accent);
+}
+
+/* The clock, as a mark across the one cell it falls in, at the minute it falls on. */
+.dnc-timeline-now {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 1px solid var(--text-accent);
+    pointer-events: none;
 }

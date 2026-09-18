@@ -1,7 +1,7 @@
 import React, {ReactElement} from 'react';
 import {format} from 'date-fns';
 import {Period} from 'src/domain/models/period.model';
-import {TimelineItem, TimelineMode} from 'src/domain/models/timeline.model';
+import {hourValue, TimelineDay, TimelineItem, TimelineMode} from 'src/domain/models/timeline.model';
 import {TimelineColumn} from 'src/presentation/contracts/timeline.view-model';
 import {useTimelineViewModel} from 'src/presentation/context/view-model.context';
 import {bandIndex, bandPlan, BandPlan, hourPiece, hourRows, TimelineLane} from 'src/presentation/timeline/timebox';
@@ -12,18 +12,22 @@ export interface TimelineComponentProperties {
 }
 
 const ROW_HEIGHT_IN_PX = 44;
+const MINUTE_MARKS = [0, 10, 20, 30, 40, 50];
 const LANES: [TimelineLane, 'locations' | 'actions'][] = [
     ['location', 'locations'],
     ['focus', 'actions'],
 ];
 
-// The whole record on every piece of it, so any of them identifies it.
+// The whole record, for the line above the grid and for anything that reads labels.
+// A piece that continues from an earlier row carries no name of its own, so this is
+// the only way to tell what one is.
 const describe = (item: TimelineItem): string =>
     item.name + ' · ' + format(item.start, 'HH:mm') + '–' + format(item.end, 'HH:mm') + (item.active ? ' · 진행 중' : '');
 
 export const TimelineComponent = (props: TimelineComponentProperties): ReactElement => {
     const viewModel = useTimelineViewModel();
     const [column, setColumn] = React.useState<TimelineColumn | null>(null);
+    const [detail, setDetail] = React.useState<string | null>(null);
     const period = props.period;
     const mode = props.mode;
 
@@ -38,6 +42,7 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
         }
 
         setColumn(null);
+        setDetail(null);
         viewModel.loadDay(period.date, mode).then(loaded => {
             if (!cancelled) {
                 setColumn(loaded);
@@ -67,14 +72,33 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
 
     const range = viewModel.getRange();
     const plan = bandPlan(column.day ? [column.day] : [], range);
+    const now = new Date();
 
     return (
         <div className="dnc-timeline" style={{['--dnc-timeline-row-height' as string]: ROW_HEIGHT_IN_PX + 'px'}}>
-            <div className="dnc-timeline-grid">
+            {/* Reading a block off a native tooltip proved unreliable inside Obsidian,
+                so what is under the pointer is named here instead. The space is held
+                open so the grid does not jump as the pointer moves. */}
+            <p className="dnc-timeline-detail">{detail ?? ' '}</p>
+
+            <div className="dnc-timeline-head">
+                <span className="dnc-timeline-hour" />
+                <span className="dnc-timeline-ruler" aria-hidden="true">
+                    {MINUTE_MARKS.map(minute => <span key={minute}>{minute}</span>)}
+                </span>
+            </div>
+
+            <div className="dnc-timeline-grid" onMouseLeave={() => setDetail(null)}>
                 {hourRows(range).map(hour =>
                     <React.Fragment key={hour}>
                         <span className="dnc-timeline-hour">{hour.toString().padStart(2, '0')}</span>
-                        <TimelineCell column={column} plan={plan} hour={hour} rangeStart={range.start} />
+                        <TimelineCell
+                            day={column.day}
+                            plan={plan}
+                            hour={hour}
+                            rangeStart={range.start}
+                            now={now}
+                            onDescribe={setDetail} />
                     </React.Fragment>,
                 )}
             </div>
@@ -83,15 +107,20 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
 };
 
 interface TimelineCellProperties {
-    column: TimelineColumn;
+    day: TimelineDay | null;
     plan: BandPlan;
     hour: number;
     rangeStart: number;
+    now: Date;
+    onDescribe: (detail: string | null) => void;
 }
 
 const TimelineCell = (props: TimelineCellProperties): ReactElement => {
-    const day = props.column.day;
+    const day = props.day;
     const bandHeight = ROW_HEIGHT_IN_PX / Math.max(1, props.plan.bands);
+    const nowHour = hourValue(props.now);
+    // The clock belongs to today alone, and is a mark across the one cell it falls in.
+    const showsNow = day?.today && nowHour >= props.hour && nowHour < props.hour + 1;
 
     return (
         <span className="dnc-timeline-cell">
@@ -102,12 +131,17 @@ const TimelineCell = (props: TimelineCellProperties): ReactElement => {
                     return null;
                 }
 
-                // ponytail: the title attribute is the whole detail view; add a popover if reading a block's calendar and length off a tooltip stops being enough.
+                const description = describe(item);
+
                 return (
-                    <span
+                    <button
                         key={lane + index}
+                        type="button"
                         className={'dnc-timeline-block ' + item.type + (item.active ? ' active' : '')}
-                        title={describe(item)}
+                        aria-label={description}
+                        title={description}
+                        onMouseEnter={() => props.onDescribe(description)}
+                        onFocus={() => props.onDescribe(description)}
                         style={{
                             left: piece.left + '%',
                             width: piece.width + '%',
@@ -115,9 +149,14 @@ const TimelineCell = (props: TimelineCellProperties): ReactElement => {
                             height: Math.max(4, bandHeight - 1) + 'px',
                         }}>
                         {!piece.continued && <strong>{item.name}</strong>}
-                    </span>
+                    </button>
                 );
             }))}
+
+            {showsNow && <span
+                className="dnc-timeline-now"
+                aria-label={'현재 시각 ' + format(props.now, 'HH:mm')}
+                style={{left: (nowHour - props.hour) * 100 + '%'}} />}
         </span>
     );
 };
