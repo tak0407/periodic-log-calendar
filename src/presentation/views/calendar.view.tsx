@@ -12,10 +12,11 @@ import {YearPeriodNoteViewModel} from 'src/presentation/view-models/year.period-
 import {ViewModelsContext} from 'src/presentation/context/view-model.context';
 import {CalendarViewModel} from 'src/presentation/contracts/calendar.view-model';
 import {NotesViewModel} from 'src/presentation/contracts/notes.view-model';
+import {TimelineViewModel} from 'src/presentation/contracts/timeline.view-model';
 
 export class CalendarView extends ItemView {
-    public static VIEW_TYPE = 'daily-note-calendar';
-    private static DISPLAY_TEXT = 'Daily note calendar';
+    public static VIEW_TYPE = 'periodic-log-calendar';
+    private static DISPLAY_TEXT = 'Periodic log calendar';
     private static ICON_NAME = 'calendar';
 
     constructor(
@@ -28,6 +29,7 @@ export class CalendarView extends ItemView {
         private readonly quarterlyNoteViewModel: QuarterPeriodNoteViewModel,
         private readonly yearlyNoteViewModel: YearPeriodNoteViewModel,
         private readonly notesViewModel: NotesViewModel,
+        private readonly timelineViewModel: TimelineViewModel,
     ) {
         super(leaf);
     }
@@ -53,6 +55,7 @@ export class CalendarView extends ItemView {
             quarterlyNoteViewModel: this.quarterlyNoteViewModel,
             yearlyNoteViewModel: this.yearlyNoteViewModel,
             notesViewModel: this.notesViewModel,
+            timelineViewModel: this.timelineViewModel,
         } as ViewModelsContext;
 
         createRoot((this.containerEl.children[1])).render(

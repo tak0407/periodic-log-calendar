@@ -1,7 +1,7 @@
 import React, {ReactElement} from 'react';
 import {CalendarHeart, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight} from 'lucide-react';
 import {useCalendarViewModel} from 'src/presentation/context/view-model.context';
-import {NotesComponent} from 'src/presentation/components/notes.component';
+import {PeriodTabsComponent} from 'src/presentation/components/period-tabs.component';
 import {MonthlyNoteComponent} from 'src/presentation/components/month.component';
 import { QuarterlyNoteComponent } from './quarter.component';
 import {YearlyNoteComponent} from 'src/presentation/components/year.component';
@@ -150,7 +150,7 @@ export const CalendarComponent = (props: CalendarComponentProperties): ReactElem
                 </tbody>
             </table>
 
-            <NotesComponent period={selectedPeriod}/>
+            <PeriodTabsComponent period={selectedPeriod}/>
         </div>
     );
 };

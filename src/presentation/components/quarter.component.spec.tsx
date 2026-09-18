@@ -3,7 +3,7 @@ import {render, act} from '@testing-library/react';
 import {QuarterlyNoteComponent} from 'src/presentation/components/quarter.component';
 import {ViewModelsContext} from 'src/presentation/context/view-model.context';
 import {ViewModelsContext as ViewModelsContextType} from 'src/presentation/context/view-model.context';
-import {mockCalendarViewModel, mockDayNoteViewModel, mockPeriodNoteViewModel} from 'src/test-helpers/view-model.mocks';
+import {mockCalendarViewModel, mockDayNoteViewModel, mockPeriodNoteViewModel, mockTimelineViewModel} from 'src/test-helpers/view-model.mocks';
 import {mockPeriod} from 'src/test-helpers/model.mocks';
 import {Period, PeriodType} from 'src/domain/models/period.model';
 
@@ -24,6 +24,7 @@ describe('QuarterlyNoteComponent', () => {
         monthlyNoteViewModel: {...mockPeriodNoteViewModel},
         quarterlyNoteViewModel: mockQuarterlyViewModel,
         yearlyNoteViewModel: {...mockPeriodNoteViewModel},
+        timelineViewModel: mockTimelineViewModel,
         notesViewModel: {
             updateNotes: jest.fn(),
             initializeCallbacks: jest.fn(),

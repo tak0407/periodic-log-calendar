@@ -33,6 +33,11 @@ import {CalendarViewModel} from 'src/presentation/contracts/calendar.view-model'
 import {NotesViewModel} from 'src/presentation/contracts/notes.view-model';
 import {DefaultNoteService} from 'src/presentation/services/default.note-service';
 import {ObsidianMessageAdapter} from 'src/presentation/obsidian/obsidian.message-adapter';
+import {ObsidianCalendarAdapter} from 'src/infrastructure/obsidian/obsidian.calendar-adapter';
+import {SqliteCalendarEventRepository} from 'src/infrastructure/repositories/sqlite.calendar-event-repository';
+import {RepositoryTimelineManager} from 'src/business/managers/repository.timeline-manager';
+import {DefaultTimelineViewModel} from 'src/presentation/view-models/default.timeline-view-model';
+import {TimelineViewModel} from 'src/presentation/contracts/timeline.view-model';
 
 export interface Dependencies {
     calendarViewModel: CalendarViewModel;
@@ -42,6 +47,7 @@ export interface Dependencies {
     quarterlyNoteViewModel: QuarterPeriodNoteViewModel;
     yearlyNoteViewModel: YearPeriodNoteViewModel;
     notesViewModel: NotesViewModel;
+    timelineViewModel: TimelineViewModel;
     dateManagerFactory: DateManagerFactory;
     dateParserFactory: DateParserFactory;
     settingsRepositoryFactory: SettingsRepositoryFactory;
@@ -57,10 +63,12 @@ export function getDependencies(plugin: Plugin): Dependencies {
     const settingsAdapter = new ObsidianSettingsAdapter(plugin);
     const fileAdapter = new ObsidianFileAdapter(plugin);
     const noteAdapter = new ObsidianNoteAdapter(plugin, dateRepositoryFactory);
+    const calendarAdapter = new ObsidianCalendarAdapter();
 
     const settingsRepositoryFactory = new DefaultSettingsRepositoryFactory(settingsAdapter);
     const fileRepositoryFactory = new DefaultFileRepositoryFactory(fileAdapter);
     const noteRepositoryFactory = new DefaultNoteRepositoryFactory(noteAdapter, dateRepositoryFactory, dateParserFactory, settingsRepositoryFactory);
+    const calendarEventRepository = new SqliteCalendarEventRepository(calendarAdapter);
 
     // Business
     const nameBuilderFactory = new DefaultNameBuilderFactory(dateParserFactory);
@@ -69,6 +77,7 @@ export function getDependencies(plugin: Plugin): Dependencies {
     const dateManagerFactory = new DefaultDateManagerFactory(dateRepositoryFactory);
     const noteManagerFactory = new DefaultNoteManagerFactory(fileRepositoryFactory, noteRepositoryFactory, settingsRepositoryFactory);
     const periodicNoteManager = new DefaultPeriodicNoteManager(nameBuilderFactory, variableParserFactory, fileRepositoryFactory, noteRepositoryFactory);
+    const timelineManager = new RepositoryTimelineManager(calendarEventRepository);
 
     // Presentation
     const calendarService = new DefaultCalendarService(dateManagerFactory);
@@ -83,6 +92,7 @@ export function getDependencies(plugin: Plugin): Dependencies {
     const quarterlyNoteViewModel = new QuarterPeriodNoteViewModel(periodService, messageAdapter);
     const yearlyNoteViewModel = new YearPeriodNoteViewModel(periodService, messageAdapter);
     const notesViewModel = new DefaultNotesViewModel(noteService);
+    const timelineViewModel = new DefaultTimelineViewModel(timelineManager);
 
     const commandHandlerFactory = new DefaultCommandHandlerFactory(
         noteManagerFactory,
@@ -105,6 +115,7 @@ export function getDependencies(plugin: Plugin): Dependencies {
         quarterlyNoteViewModel: quarterlyNoteViewModel,
         yearlyNoteViewModel: yearlyNoteViewModel,
         notesViewModel: notesViewModel,
+        timelineViewModel: timelineViewModel,
         dateManagerFactory: dateManagerFactory,
         dateParserFactory: dateParserFactory,
         settingsRepositoryFactory: settingsRepositoryFactory,

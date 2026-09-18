@@ -3,6 +3,7 @@ import {CalendarViewModel} from 'src/presentation/contracts/calendar.view-model'
 import {PeriodNoteViewModel} from 'src/presentation/contracts/period.view-model';
 import {DayNoteViewModel} from 'src/presentation/contracts/day.view-model';
 import { NotesViewModel } from 'src/presentation/contracts/notes.view-model';
+import { TimelineViewModel } from 'src/presentation/contracts/timeline.view-model';
 
 export interface ViewModelsContext {
     calendarViewModel: CalendarViewModel;
@@ -12,6 +13,7 @@ export interface ViewModelsContext {
     quarterlyNoteViewModel: PeriodNoteViewModel;
     yearlyNoteViewModel: PeriodNoteViewModel;
     notesViewModel: NotesViewModel;
+    timelineViewModel: TimelineViewModel;
 }
 
 export const ViewModelsContext = createContext<ViewModelsContext | null>(null);
@@ -36,3 +38,6 @@ export const useYearlyNoteViewModel = (): PeriodNoteViewModel | null =>
 
 export const useNotesViewModel = (): NotesViewModel | null =>
     useContext(ViewModelsContext)?.notesViewModel ?? null;
+
+export const useTimelineViewModel = (): TimelineViewModel | null =>
+    useContext(ViewModelsContext)?.timelineViewModel ?? null;

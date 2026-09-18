@@ -2,6 +2,7 @@ import {CalendarViewModel} from 'src/presentation/contracts/calendar.view-model'
 import {PeriodNoteViewModel} from 'src/presentation/contracts/period.view-model';
 import {DayNoteViewModel} from 'src/presentation/contracts/day.view-model';
 import {NotesViewModel} from 'src/presentation/contracts/notes.view-model';
+import {TimelineViewModel} from 'src/presentation/contracts/timeline.view-model';
 
 export const mockCalendarViewModel = {
     setSelectedPeriod: jest.fn(),
@@ -55,3 +56,10 @@ export const mockNotesViewModel = {
     openNoteInVerticalSplitView: jest.fn(),
     deleteNote: jest.fn(),
 } as jest.Mocked<NotesViewModel>;
+
+export const mockTimelineViewModel = {
+    updateSettings: jest.fn(),
+    isSupported: jest.fn(),
+    getRange: jest.fn(),
+    loadDay: jest.fn(),
+} as jest.Mocked<TimelineViewModel>;

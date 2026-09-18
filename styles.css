@@ -195,3 +195,108 @@
     margin-top: 0.5rem;
     border-radius: 0.25rem;
 }
+/* Tabs below the calendar, and the log & plan timeline in the second one. */
+
+.dnc-tab-list {
+    display: flex;
+    gap: 0.2em;
+    border-bottom: 1px solid var(--background-modifier-border);
+    margin-bottom: 0.4em;
+}
+
+.dnc-tab {
+    flex: 1;
+    box-shadow: none;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0.3em 0.2em;
+    font-size: var(--font-ui-small);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.dnc-tab:hover {
+    color: var(--text-normal);
+}
+
+.dnc-tab.active {
+    color: var(--text-accent);
+    border-bottom: 2px solid var(--text-accent);
+}
+
+.dnc-timeline-empty {
+    font-size: var(--font-ui-small);
+    color: var(--text-muted);
+    padding: 0.6em 0.2em;
+    margin: 0;
+}
+
+.dnc-timeline-head,
+.dnc-timeline-grid {
+    display: grid;
+    grid-template-columns: 2em 1fr 1fr;
+    gap: 1px;
+}
+
+.dnc-timeline-column-head {
+    font-size: var(--font-ui-smaller);
+    font-weight: var(--font-medium);
+    color: var(--text-muted);
+    text-align: center;
+    padding-bottom: 0.2em;
+}
+
+.dnc-timeline-error {
+    display: block;
+    font-style: normal;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-error);
+    text-align: left;
+    padding: 0.2em 0;
+}
+
+.dnc-timeline-hour {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-faint);
+    text-align: right;
+    padding-right: 0.3em;
+    line-height: var(--dnc-timeline-row-height);
+}
+
+.dnc-timeline-cell {
+    position: relative;
+    display: block;
+    height: var(--dnc-timeline-row-height);
+    background-color: var(--background-secondary);
+    border-radius: 2px;
+}
+
+/* An hour is a row, and left to right across a cell is that hour's sixty minutes. */
+.dnc-timeline-block {
+    position: absolute;
+    overflow: hidden;
+    min-width: 2px;
+    border-radius: 2px;
+    font-size: var(--font-ui-smaller);
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--text-on-accent);
+    background-color: var(--color-base-50);
+}
+
+.dnc-timeline-block strong {
+    font-weight: var(--font-normal);
+    padding: 0 0.2em;
+}
+
+.dnc-timeline-block.home { background-color: var(--color-green); }
+.dnc-timeline-block.work { background-color: var(--color-blue); }
+.dnc-timeline-block.move { background-color: var(--color-yellow); }
+.dnc-timeline-block.place { background-color: var(--color-cyan); }
+.dnc-timeline-block.focus { background-color: var(--color-purple); }
+.dnc-timeline-block.plan { background-color: var(--color-orange); }
+
+.dnc-timeline-block.active {
+    outline: 1px solid var(--text-accent);
+}
