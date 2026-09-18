@@ -75,7 +75,10 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
     const now = new Date();
 
     return (
-        <div className="dnc-timeline" style={{['--dnc-timeline-row-height' as string]: ROW_HEIGHT_IN_PX + 'px'}}>
+        <div className="dnc-timeline" style={{
+            ['--dnc-timeline-row-height' as string]: ROW_HEIGHT_IN_PX + 'px',
+            ['--dnc-timeline-band-height' as string]: ROW_HEIGHT_IN_PX / Math.max(1, plan.bands) + 'px',
+        }}>
             {/* Reading a block off a native tooltip proved unreliable inside Obsidian,
                 so what is under the pointer is named here instead. The space is held
                 open so the grid does not jump as the pointer moves. */}
@@ -137,7 +140,10 @@ const TimelineCell = (props: TimelineCellProperties): ReactElement => {
                     <button
                         key={lane + index}
                         type="button"
-                        className={'dnc-timeline-block ' + item.type + (item.active ? ' active' : '')}
+                        className={'dnc-timeline-block ' + item.type
+                            + (piece.continued ? ' continued' : '')
+                            + (piece.continues ? ' continues' : '')
+                            + (item.active ? ' active' : '')}
                         aria-label={description}
                         title={description}
                         onMouseEnter={() => props.onDescribe(description)}
@@ -148,7 +154,7 @@ const TimelineCell = (props: TimelineCellProperties): ReactElement => {
                             top: bandIndex(props.plan, lane, item.column) * bandHeight + 'px',
                             height: Math.max(4, bandHeight - 1) + 'px',
                         }}>
-                        {!piece.continued && <strong>{item.name}</strong>}
+                        {!piece.continued && <span className="dnc-timeline-block-title">{item.name}</span>}
                     </button>
                 );
             }))}
@@ -156,7 +162,9 @@ const TimelineCell = (props: TimelineCellProperties): ReactElement => {
             {showsNow && <span
                 className="dnc-timeline-now"
                 aria-label={'현재 시각 ' + format(props.now, 'HH:mm')}
-                style={{left: (nowHour - props.hour) * 100 + '%'}} />}
+                style={{left: (nowHour - props.hour) * 100 + '%'}}>
+                <span>{format(props.now, 'HH:mm')}</span>
+            </span>}
         </span>
     );
 };

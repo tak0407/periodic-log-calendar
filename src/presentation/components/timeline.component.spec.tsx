@@ -189,6 +189,21 @@ describe('TimelineComponent', () => {
         expect(screen.getAllByLabelText(/^At home/)).toHaveLength(2);
     });
 
+    it('should give a leading edge only to the row a record starts on', async () => {
+        // Arrange
+        when(mockTimelineViewModel.loadDay).mockResolvedValue(column([item('At home', 9, 11)]));
+
+        // Act
+        await renderComponent();
+
+        // Assert
+        const pieces = screen.getAllByLabelText(/^At home/);
+        expect(pieces[0].className).toContain('continues');
+        expect(pieces[0].className).not.toContain('continued');
+        expect(pieces[1].className).toContain('continued');
+        expect(pieces[1].className).not.toContain('continues');
+    });
+
     it('should show why a side could not be read instead of an empty grid', async () => {
         // Arrange
         when(mockTimelineViewModel.loadDay)
