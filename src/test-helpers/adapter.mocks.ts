@@ -2,6 +2,7 @@ import {FileAdapter} from 'src/infrastructure/adapters/file.adapter';
 import {NoteAdapter} from 'src/infrastructure/adapters/note.adapter';
 import {SettingsAdapter} from 'src/infrastructure/adapters/settings.adapter';
 import {MessageAdapter} from 'src/presentation/adapters/message.adapter';
+import {CalendarAdapter} from 'src/infrastructure/adapters/calendar.adapter';
 
 export const mockFileAdapter = {
     exists: jest.fn(),
@@ -27,3 +28,9 @@ export const mockSettingsAdapter = {
     getSettings: jest.fn(),
     storeSettings: jest.fn(),
 } as jest.Mocked<SettingsAdapter>;
+
+export const mockCalendarAdapter = {
+    isSupported: jest.fn(),
+    query: jest.fn(),
+    openFullDiskAccessSettings: jest.fn(),
+} as jest.Mocked<CalendarAdapter>;
