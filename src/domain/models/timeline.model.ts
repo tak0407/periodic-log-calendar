@@ -51,3 +51,12 @@ export interface HourRange {
     start: number;
     end: number;
 }
+
+// Where a moment sits on the clock, as hours of its own day. Read off the wall
+// clock rather than from elapsed milliseconds, so a day is never assumed to be
+// 86,400 seconds: on the 23-hour spring-forward day the hour that does not exist
+// simply has no content, and on the 25-hour day the repeated hour lands twice and
+// separates through the overlap bands.
+export function hourValue(date: Date): number {
+    return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+}
