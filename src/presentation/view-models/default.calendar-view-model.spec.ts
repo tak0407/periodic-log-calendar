@@ -47,6 +47,7 @@ describe('DefaultCalendarViewModel', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     describe('initialize', () => {
@@ -185,6 +186,22 @@ describe('DefaultCalendarViewModel', () => {
                 expect(result.weeks).toEqual(currentWeek);
                 expect(result.today).toEqual(today);
             });
+        });
+
+        it('should take the day names from the locale and still rotate them to the first day of the week', () => {
+            // Arrange
+            const localeDayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => (<any>{
+                format: (date: Date) => localeDayNames[date.getDay()],
+            }));
+            const settings = <PluginSettings>{ ...DEFAULT_PLUGIN_SETTINGS, generalSettings: { ...DEFAULT_GENERAL_SETTINGS, firstDayOfWeek: DayOfWeek.Monday }};
+
+            // Act
+            viewModel.initialize(settings, today);
+            const result = viewModel.getCurrentWeek();
+
+            // Assert
+            expect(result.weekDays).toEqual(['월', '화', '수', '목', '금', '토', '일']);
         });
 
         it('should calculate correct startIndex for Monday as first day of week', () => {
