@@ -288,3 +288,42 @@ When a new Obsidian version is released:
 - Performance under load
 
 This separation keeps automated tests fast, maintainable, and decoupled from Obsidian implementation details, while manual QA validates real-world integration correctness.
+
+---
+
+## Log & plan tab (fork only)
+
+The Apple Calendar adapter shells out to `sqlite3`, so it is excluded from automated
+testing for the same reason as the Obsidian adapters. Everything below needs a real
+macOS machine with real calendars.
+
+### Platform and permissions
+- [ ] On macOS desktop with Full Disk Access granted, the tab draws the day
+- [ ] With Full Disk Access revoked, the tab explains that the permission is missing and does not throw
+- [ ] The plugin does not appear at all in the mobile plugin list (`isDesktopOnly`)
+
+### Reading, and only reading
+- [ ] `Calendar.sqlitedb` modification time is unchanged after opening the tab many times
+      (`stat -f %m ~/Library/Group\ Containers/group.com.apple.calendar/Calendar.sqlitedb` before and after)
+- [ ] Apple Calendar shows no new, changed or deleted events after a session with the tab open
+
+### The day itself
+- [ ] Records appear in the left column and plans in the right, on the same hour rows
+- [ ] A record that crosses an hour boundary is named once, on the row it starts on
+- [ ] Two overlapping records sit side by side rather than hiding one another
+- [ ] A stay still in progress runs up to the current time
+- [ ] Two stays in the same place a minute apart are drawn as one
+- [ ] A record crossing midnight stops at the bottom of the day and continues on the next day
+- [ ] Selecting a different date redraws both columns
+
+### Settings
+- [ ] Changing a calendar name in Settings → Log & plan changes what the tab reads
+- [ ] A calendar name containing an apostrophe works
+- [ ] Clearing the plan calendars makes the plan column point at the settings, and leaves the record column readable
+- [ ] Changing the first and last hour changes which rows are drawn
+
+### Nothing else moved
+- [ ] The Notes tab is the one selected when the calendar view opens
+- [ ] Notes still list, open, open in split views and delete exactly as before
+- [ ] Periodic note creation and navigation are unaffected
+- [ ] With the original `daily-note-calendar` also installed and enabled, both plugins load and both sidebar views work

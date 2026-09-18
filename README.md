@@ -54,6 +54,7 @@ write my own plugin which allows you to customize the format of your daily and e
         - [1.4.3 Navigate to the next or previous month](#143-navigate-to-the-next-or-previous-month)
         - [1.4.4 Display the current note in calendar](#144-display-the-current-note-in-calendar)
     - [1.5 Displaying notes created on a specific day](#14-displaying-notes-created-on-a-specific-day)
+    - [1.6 The log and plan timeline](#16-the-log-and-plan-timeline)
 - [2. External dependencies](#2-external-dependencies)
 - [3. Build and test](#3-build-and-test)
 - [4. Contribute](#4-contribute)
@@ -192,6 +193,34 @@ When you've enabled the feature to display notes created on a specific day, you 
 This will highlight the date of the current note in the calendar, and below the calendar all notes that are created on the same date as the currently opened note.
 
 The command will either use the date that the note was created on, or the property specified in the plugin settings.
+
+## 1.6 The log and plan timeline
+
+*This section describes a feature of this fork that upstream does not have.*
+
+The area below the calendar has two tabs. **Notes** is the view described above and is
+the one you land on. **기록·계획** (log & plan) puts the selected day's Apple Calendar
+records beside its plans on one set of hour rows: an hour is a row in both columns, and
+across a cell, left to right, are that hour's sixty minutes. A record that spans several
+rows is named on the row it starts on and carries the colour alone through the rest, so
+one stretch reads as one thing.
+
+The left column is what happened, read from two calendars: a *location* calendar of
+where you were, and a *focus* calendar of what you were doing. Stays in the same place
+less than two minutes apart are joined, and a stay that is still open — recorded with no
+end time — is drawn up to the current moment for as long as nothing newer follows it.
+The right column is what was planned, read from whichever calendars you pick.
+
+Set all of this under **Settings → Log & plan**. Overlapping records get a lane each
+rather than hiding one another, so a busy hour stays readable.
+
+**What it needs.** macOS, the desktop app, and Full Disk Access for Obsidian
+(System Settings → Privacy & Security → Full Disk Access) so that `sqlite3` can open the
+Calendar database. The tab says what is missing rather than failing if any of that is
+not in place, and it asks nothing of the calendar at all until you open it.
+
+**The database is only ever read.** `sqlite3` is invoked with `-readonly`, and the
+plugin has no code that writes to Apple Calendar.
 
 # 2. External dependencies
 
