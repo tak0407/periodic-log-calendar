@@ -306,18 +306,6 @@
     grid-template-columns: 2em 1fr;
 }
 
-/* What the pointer is on, named in full. A continued piece carries no name of its
-   own, so this is how you tell one apart. */
-.dnc-timeline-detail {
-    margin: 0 0 0.2em;
-    min-height: 1.4em;
-    font-size: var(--font-ui-smaller);
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 /* The minute axis, named once at the top. */
 .dnc-timeline-ruler {
     display: grid;

@@ -1,5 +1,5 @@
 import React, {ReactNode} from 'react';
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {act, render, screen} from '@testing-library/react';
 import {when} from 'jest-when';
 import {TimelineComponent} from 'src/presentation/components/timeline.component';
 import {ViewModelsContext} from 'src/presentation/context/view-model.context';
@@ -188,19 +188,28 @@ describe('TimelineComponent', () => {
         jest.useRealTimers();
     });
 
-    it('should name whatever the pointer is on, including a piece that carries no name', async () => {
+    it('should name every piece of a record, including one that carries no title of its own', async () => {
         // Arrange
         when(mockTimelineViewModel.loadDay).mockResolvedValue(column([item('At home', 9, 11)]));
-        await renderComponent();
-        const pieces = screen.getAllByLabelText(/^At home/);
 
         // Act
-        await act(async () => {
-            fireEvent.mouseEnter(pieces[1]);
-        });
+        await renderComponent();
 
         // Assert
-        expect(screen.getByText('At home · 09:00–11:00')).toBeTruthy();
+        const pieces = screen.getAllByLabelText('At home · 09:00–11:00');
+        expect(pieces).toHaveLength(2);
+        expect(pieces[1].textContent).toBe('');
+    });
+
+    it('should leave the naming to one tooltip rather than stacking several', async () => {
+        // Arrange
+        when(mockTimelineViewModel.loadDay).mockResolvedValue(column([item('At home', 9, 10)]));
+
+        // Act
+        await renderComponent();
+
+        // Assert
+        expect(screen.getByLabelText('At home · 09:00–10:00').getAttribute('title')).toBeNull();
     });
 
     it('should name a record on the row it starts on and not on the rows it continues into', async () => {
