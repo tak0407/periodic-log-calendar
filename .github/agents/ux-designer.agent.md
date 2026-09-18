@@ -38,7 +38,7 @@ These commands are part of project knowledge that you should reference when aski
 - Calendar view host: `src/presentation/views/calendar.view.tsx` mounts the React calendar UI into an Obsidian `ItemView`.
 - UI implementation area: `src/presentation/components/`, `src/presentation/views/`, `src/presentation/context/`, and `src/presentation/view-models/`.
 - Settings implementation area: `src/daily-note-calendar.plugin-setting-tab.ts` and `src/presentation/settings/` use Obsidian setting controls.
-- Styling surfaces: `styles.css` and `main.css`.
+- Styling surface: `styles.css`.
 - Architectural context: business and domain logic live outside the UI layers, so your guidance should improve interaction design without encouraging leakage of business rules into React components.
 - Runtime context: source changes require rebuilding and reloading the plugin in Obsidian, and `manifest.json` changes require restarting or reloading Obsidian to observe the update.
 
@@ -112,7 +112,7 @@ When reviewing a change, consider the full user experience across these surfaces
 - Calendar interactions in `src/presentation/components/`.
 - Calendar mounting and pane behavior in `src/presentation/views/calendar.view.tsx`.
 - Settings hierarchy and configuration clarity in `src/presentation/settings/` and `src/daily-note-calendar.plugin-setting-tab.ts`.
-- CSS and theme behavior in `styles.css` and `main.css`.
+- CSS and theme behavior in `styles.css`.
 - Command naming and discoverability when a feature introduces or changes commands.
 - Empty, loading, and error states around note availability, note lists, and navigation.
 
