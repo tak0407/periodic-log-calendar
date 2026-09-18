@@ -138,6 +138,12 @@ describe('CalendarComponent', () => {
         expect(container.textContent).toContain('2023');
     });
 
+    it('renders the year before the month in the header', async () => {
+        const {container} = render(<CalendarComponent initialCalendar={mockCalendar} />, {wrapper});
+
+        expect(container.querySelector('.title')?.textContent).toBe('2023October');
+    });
+
     it('renders quarter in table header', async () => {
         const {container} = render(<CalendarComponent initialCalendar={mockCalendar} />, {wrapper});
 

@@ -90,12 +90,13 @@ export const CalendarComponent = (props: CalendarComponentProperties): ReactElem
     return (
         <div className="dnc">
             <div className="header">
+                {/* Year before month, the order CJK locales write dates in. */}
                 <span className="title">
                     <h1>
-                        <MonthlyNoteComponent month={calendar.month} />
+                        <YearlyNoteComponent year={calendar.year} />
                     </h1>
                     <h1>
-                        <YearlyNoteComponent year={calendar.year} />
+                        <MonthlyNoteComponent month={calendar.month} />
                     </h1>
                 </span>
 
