@@ -459,10 +459,16 @@
     position: absolute;
     top: 0;
     left: 2px;
+    white-space: nowrap;
     padding: 0 2px;
     border-radius: 2px;
     background: var(--background-primary);
     color: var(--dnc-now);
     font-size: 8px;
     font-variant-numeric: tabular-nums;
+}
+
+.dnc-timeline-now.flipped > span {
+    left: auto;
+    right: 2px;
 }

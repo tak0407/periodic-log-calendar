@@ -146,6 +146,31 @@ describe('TimelineComponent', () => {
         jest.useRealTimers();
     });
 
+    it('should move the clock label to the other side of the line past the half hour', async () => {
+        // Arrange
+        jest.useFakeTimers().setSystemTime(new Date(2023, 9, 2, 10, 50).getTime());
+
+        // Act
+        await renderComponent();
+
+        // Assert
+        const mark = screen.getByLabelText('현재 시각 10:50');
+        expect(mark.className).toContain('flipped');
+        jest.useRealTimers();
+    });
+
+    it('should keep the clock label after the line before the half hour', async () => {
+        // Arrange
+        jest.useFakeTimers().setSystemTime(new Date(2023, 9, 2, 10, 10).getTime());
+
+        // Act
+        await renderComponent();
+
+        // Assert
+        expect(screen.getByLabelText('현재 시각 10:10').className).not.toContain('flipped');
+        jest.useRealTimers();
+    });
+
     it('should not mark the current time on a day that is not today', async () => {
         // Arrange
         jest.useFakeTimers().setSystemTime(new Date(2023, 9, 2, 10, 30).getTime());

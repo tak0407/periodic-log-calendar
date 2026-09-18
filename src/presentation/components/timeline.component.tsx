@@ -164,8 +164,10 @@ const TimelineCell = (props: TimelineCellProperties): ReactElement => {
                 );
             }))}
 
+            {/* Past the half hour the label would run off the right of the cell and
+                be cut, so it changes sides and sits before the line instead. */}
             {showsNow && <span
-                className="dnc-timeline-now"
+                className={'dnc-timeline-now' + (nowHour - props.hour >= 0.5 ? ' flipped' : '')}
                 aria-label={'현재 시각 ' + format(props.now, 'HH:mm')}
                 style={{left: (nowHour - props.hour) * 100 + '%'}}>
                 <span>{format(props.now, 'HH:mm')}</span>
