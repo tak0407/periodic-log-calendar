@@ -209,7 +209,9 @@
     margin-bottom: 0.4em;
 }
 
-.dnc-tab {
+/* Same prefix rule as the blocks below: Obsidian's button styling outranks a
+   single class. */
+.dnc-tabs button.dnc-tab {
     flex: 1;
     box-shadow: none;
     background: transparent;
@@ -221,11 +223,11 @@
     cursor: pointer;
 }
 
-.dnc-tab:hover {
+.dnc-tabs button.dnc-tab:hover {
     color: var(--text-normal);
 }
 
-.dnc-tab.active {
+.dnc-tabs button.dnc-tab.active {
     color: var(--text-accent);
     border-bottom: 2px solid var(--text-accent);
 }
@@ -326,7 +328,12 @@
     );
 }
 
-.dnc-timeline-block {
+/* Every one of these is written as `.dnc-timeline button.dnc-timeline-block` on
+   purpose. Obsidian styles its buttons with enough specificity to beat a single
+   class, which silently drops background, colour, border and padding and leaves the
+   record wearing Obsidian's grey. The modifiers carry the same prefix plus their own
+   class, so they still win against the base rule. */
+.dnc-timeline button.dnc-timeline-block {
     --dnc-event-color: var(--dnc-home);
     --dnc-event-bg: color-mix(in srgb, var(--dnc-event-color) 24%, var(--background-primary));
     position: absolute;
@@ -346,7 +353,7 @@
 }
 
 /* The leading edge, so a record reads as starting at a moment rather than filling a box. */
-.dnc-timeline-block::before {
+.dnc-timeline button.dnc-timeline-block::before {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -356,35 +363,41 @@
     content: '';
 }
 
-.dnc-timeline-block.home { --dnc-event-color: var(--dnc-home); }
-.dnc-timeline-block.move { --dnc-event-color: var(--dnc-move); }
-.dnc-timeline-block.work { --dnc-event-color: var(--dnc-work); }
-.dnc-timeline-block.place { --dnc-event-color: var(--dnc-place); }
-.dnc-timeline-block.focus { --dnc-event-color: var(--dnc-focus); }
-.dnc-timeline-block.plan { --dnc-event-color: var(--dnc-plan); }
+.dnc-timeline button.dnc-timeline-block.home { --dnc-event-color: var(--dnc-home); }
+.dnc-timeline button.dnc-timeline-block.move { --dnc-event-color: var(--dnc-move); }
+.dnc-timeline button.dnc-timeline-block.work { --dnc-event-color: var(--dnc-work); }
+.dnc-timeline button.dnc-timeline-block.place { --dnc-event-color: var(--dnc-place); }
+.dnc-timeline button.dnc-timeline-block.focus { --dnc-event-color: var(--dnc-focus); }
+.dnc-timeline button.dnc-timeline-block.plan { --dnc-event-color: var(--dnc-plan); }
 
 /* A piece carried in from an earlier row has no edge of its own: it did not start
    here, so it is not given a leading bar or a rounded corner to pretend it did. */
-.dnc-timeline-block.continued {
+.dnc-timeline button.dnc-timeline-block.continued {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     padding-left: 3px;
 }
 
-.dnc-timeline-block.continued::before {
+.dnc-timeline button.dnc-timeline-block.continued::before {
     content: none;
 }
 
-.dnc-timeline-block.continues {
+.dnc-timeline button.dnc-timeline-block.continues {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
 
-.dnc-timeline-block.active {
+.dnc-timeline button.dnc-timeline-block.active {
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dnc-event-color) 55%, transparent);
 }
 
-.dnc-timeline-block-title {
+.dnc-timeline button.dnc-timeline-block:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -1px;
+    z-index: 5;
+}
+
+.dnc-timeline .dnc-timeline-block-title {
     display: block;
     overflow: hidden;
     font-size: 10px;
@@ -392,12 +405,6 @@
     line-height: calc(var(--dnc-timeline-band-height, 22px) - 1px);
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.dnc-timeline-block:focus-visible {
-    outline: 2px solid var(--interactive-accent);
-    outline-offset: -1px;
-    z-index: 5;
 }
 
 /* The clock crosses the one cell it falls in, at the minute it falls on. */
