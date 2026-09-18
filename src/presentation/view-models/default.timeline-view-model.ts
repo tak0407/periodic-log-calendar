@@ -28,21 +28,14 @@ export class DefaultTimelineViewModel implements TimelineViewModel {
         return viewRange(this.settings);
     }
 
-    // Both sides are asked for at once and each keeps its own failure, so a missing
-    // plan calendar still leaves the recorded side on screen.
-    public loadDay(date: Date): Promise<TimelineColumn[]> {
-        return Promise.all([
-            this.loadColumn(date, TimelineMode.Actual, '기록'),
-            this.loadColumn(date, TimelineMode.Plan, '계획'),
-        ]);
-    }
-
-    private async loadColumn(date: Date, mode: TimelineMode, label: string): Promise<TimelineColumn> {
+    // One side at a time, so a tab only ever asks for what it shows, and a failure
+    // stays in the tab that caused it.
+    public async loadDay(date: Date, mode: TimelineMode): Promise<TimelineColumn> {
         try {
             const day = await this.timelineManager.getDay(date, mode, this.settings);
-            return <TimelineColumn>{mode: mode, label: label, day: day, error: null};
+            return <TimelineColumn>{mode: mode, day: day, error: null};
         } catch (error) {
-            return <TimelineColumn>{mode: mode, label: label, day: null, error: this.messageFor(error)};
+            return <TimelineColumn>{mode: mode, day: null, error: this.messageFor(error)};
         }
     }
 

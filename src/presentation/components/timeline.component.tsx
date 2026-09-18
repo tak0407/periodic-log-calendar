@@ -1,13 +1,14 @@
 import React, {ReactElement} from 'react';
 import {format} from 'date-fns';
 import {Period} from 'src/domain/models/period.model';
-import {TimelineItem} from 'src/domain/models/timeline.model';
+import {TimelineItem, TimelineMode} from 'src/domain/models/timeline.model';
 import {TimelineColumn} from 'src/presentation/contracts/timeline.view-model';
 import {useTimelineViewModel} from 'src/presentation/context/view-model.context';
 import {bandIndex, bandPlan, BandPlan, hourPiece, hourRows, TimelineLane} from 'src/presentation/timeline/timebox';
 
 export interface TimelineComponentProperties {
     period: Period | null;
+    mode: TimelineMode;
 }
 
 const ROW_HEIGHT_IN_PX = 44;
@@ -22,8 +23,9 @@ const describe = (item: TimelineItem): string =>
 
 export const TimelineComponent = (props: TimelineComponentProperties): ReactElement => {
     const viewModel = useTimelineViewModel();
-    const [columns, setColumns] = React.useState<TimelineColumn[] | null>(null);
+    const [column, setColumn] = React.useState<TimelineColumn | null>(null);
     const period = props.period;
+    const mode = props.mode;
 
     React.useEffect(() => {
         let cancelled = false;
@@ -31,21 +33,21 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
         // Nothing is asked of the calendar on a platform that cannot answer, so an
         // unsupported install never shells out at all.
         if (!viewModel || !period || !viewModel.isSupported()) {
-            setColumns(null);
+            setColumn(null);
             return;
         }
 
-        setColumns(null);
-        viewModel.loadDay(period.date).then(loaded => {
+        setColumn(null);
+        viewModel.loadDay(period.date, mode).then(loaded => {
             if (!cancelled) {
-                setColumns(loaded);
+                setColumn(loaded);
             }
         });
 
         return (): void => {
             cancelled = true;
         };
-    }, [viewModel, period]);
+    }, [viewModel, period, mode]);
 
     if (!period) {
         return (<p className="dnc-timeline-empty">날짜를 선택하세요.</p>);
@@ -55,39 +57,24 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
         return (<p className="dnc-timeline-empty">기록·계획은 macOS 데스크톱에서만 읽을 수 있습니다.</p>);
     }
 
-    if (!columns) {
+    if (!column) {
         return (<p className="dnc-timeline-empty">불러오는 중…</p>);
     }
 
+    if (column.error) {
+        return (<p className="dnc-timeline-empty dnc-timeline-error">{column.error}</p>);
+    }
+
     const range = viewModel.getRange();
-    const hours = hourRows(range);
-    const plans = columns.map(column => bandPlan(column.day ? [column.day] : [], range));
+    const plan = bandPlan(column.day ? [column.day] : [], range);
 
     return (
         <div className="dnc-timeline" style={{['--dnc-timeline-row-height' as string]: ROW_HEIGHT_IN_PX + 'px'}}>
-            <div className="dnc-timeline-head">
-                <span className="dnc-timeline-hour" />
-                {columns.map(column =>
-                    <span key={column.mode} className="dnc-timeline-column-head">
-                        {column.label}
-                        {column.error && <em className="dnc-timeline-error">{column.error}</em>}
-                    </span>,
-                )}
-            </div>
-
             <div className="dnc-timeline-grid">
-                {hours.map(hour =>
+                {hourRows(range).map(hour =>
                     <React.Fragment key={hour}>
                         <span className="dnc-timeline-hour">{hour.toString().padStart(2, '0')}</span>
-
-                        {columns.map((column, columnIndex) =>
-                            <TimelineCell
-                                key={column.mode}
-                                column={column}
-                                plan={plans[columnIndex]}
-                                hour={hour}
-                                rangeStart={range.start} />,
-                        )}
+                        <TimelineCell column={column} plan={plan} hour={hour} rangeStart={range.start} />
                     </React.Fragment>,
                 )}
             </div>

@@ -32,16 +32,19 @@ describe('TimelineComponent', () => {
         columns: 1,
     });
 
-    const day = (locations: TimelineItem[], actions: TimelineItem[]): TimelineDay => ({
+    const day = (locations: TimelineItem[]): TimelineDay => ({
         date: new Date(2023, 9, 2),
         today: true,
         future: false,
         locations: locations,
-        actions: actions,
+        actions: [],
     });
 
-    const column = (mode: TimelineMode, label: string, value: TimelineDay | null, error: string | null): TimelineColumn =>
-        ({mode: mode, label: label, day: value, error: error});
+    const column = (locations: TimelineItem[], error: string | null = null): TimelineColumn => ({
+        mode: TimelineMode.Actual,
+        day: error ? null : day(locations),
+        error: error,
+    });
 
     const mockContext: ViewModelsContextType = {
         calendarViewModel: mockCalendarViewModel,
@@ -63,26 +66,23 @@ describe('TimelineComponent', () => {
     beforeEach(() => {
         when(mockTimelineViewModel.isSupported).mockReturnValue(true);
         when(mockTimelineViewModel.getRange).mockReturnValue({start: 9, end: 12});
-        when(mockTimelineViewModel.loadDay).mockResolvedValue([
-            column(TimelineMode.Actual, '기록', day([], []), null),
-            column(TimelineMode.Plan, '계획', day([], []), null),
-        ]);
+        when(mockTimelineViewModel.loadDay).mockResolvedValue(column([]));
     });
 
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    const renderComponent = async (): Promise<void> => {
+    const renderComponent = async (mode = TimelineMode.Actual): Promise<void> => {
         await act(async () => {
-            render(<TimelineComponent period={period} />, {wrapper});
+            render(<TimelineComponent period={period} mode={mode} />, {wrapper});
         });
     };
 
     it('should ask for nothing and explain itself when no date is selected', async () => {
         // Act
         await act(async () => {
-            render(<TimelineComponent period={null} />, {wrapper});
+            render(<TimelineComponent period={null} mode={TimelineMode.Actual} />, {wrapper});
         });
 
         // Assert
@@ -102,14 +102,20 @@ describe('TimelineComponent', () => {
         expect(mockTimelineViewModel.loadDay).not.toHaveBeenCalled();
     });
 
-    it('should put the record and the plan on the same hours', async () => {
+    it('should ask for only the side it shows', async () => {
+        // Act
+        await renderComponent(TimelineMode.Plan);
+
+        // Assert
+        expect(mockTimelineViewModel.loadDay).toHaveBeenCalledTimes(1);
+        expect(mockTimelineViewModel.loadDay).toHaveBeenCalledWith(period.date, TimelineMode.Plan);
+    });
+
+    it('should draw a row for every hour of the window, ending before the last one', async () => {
         // Act
         await renderComponent();
 
         // Assert
-        expect(mockTimelineViewModel.loadDay).toHaveBeenCalledWith(period.date);
-        expect(screen.getByText('기록')).toBeTruthy();
-        expect(screen.getByText('계획')).toBeTruthy();
         expect(screen.getByText('09')).toBeTruthy();
         expect(screen.getByText('11')).toBeTruthy();
         expect(screen.queryByText('12')).toBeNull();
@@ -117,10 +123,7 @@ describe('TimelineComponent', () => {
 
     it('should name a record on the row it starts on and not on the rows it continues into', async () => {
         // Arrange
-        when(mockTimelineViewModel.loadDay).mockResolvedValue([
-            column(TimelineMode.Actual, '기록', day([item('At home', 9, 11)], []), null),
-            column(TimelineMode.Plan, '계획', day([], []), null),
-        ]);
+        when(mockTimelineViewModel.loadDay).mockResolvedValue(column([item('At home', 9, 11)]));
 
         // Act
         await renderComponent();
@@ -130,18 +133,16 @@ describe('TimelineComponent', () => {
         expect(screen.getAllByTitle(/^At home/)).toHaveLength(2);
     });
 
-    it('should show a column that failed without losing the one that did not', async () => {
+    it('should show why a side could not be read instead of an empty grid', async () => {
         // Arrange
-        when(mockTimelineViewModel.loadDay).mockResolvedValue([
-            column(TimelineMode.Actual, '기록', day([item('At home', 9, 10)], []), null),
-            column(TimelineMode.Plan, '계획', null, '계획에 사용할 캘린더가 선택되지 않았습니다. 설정에서 고르세요.'),
-        ]);
+        when(mockTimelineViewModel.loadDay)
+            .mockResolvedValue(column([], '계획에 사용할 캘린더가 선택되지 않았습니다. 설정에서 고르세요.'));
 
         // Act
-        await renderComponent();
+        await renderComponent(TimelineMode.Plan);
 
         // Assert
         expect(screen.getByText('계획에 사용할 캘린더가 선택되지 않았습니다. 설정에서 고르세요.')).toBeTruthy();
-        expect(screen.getByText('At home')).toBeTruthy();
+        expect(screen.queryByText('09')).toBeNull();
     });
 });

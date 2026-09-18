@@ -59,30 +59,32 @@ describe('DefaultTimelineViewModel', () => {
     });
 
     describe('loadDay', () => {
-        it('should ask for the recorded day and the planned day of the same date', async () => {
+        it('should ask for only the side it was asked for', async () => {
             // Act
-            const result = await viewModel.loadDay(date);
+            const result = await viewModel.loadDay(date, TimelineMode.Actual);
 
             // Assert
+            expect(timelineManager.getDay).toHaveBeenCalledTimes(1);
             expect(timelineManager.getDay).toHaveBeenCalledWith(date, TimelineMode.Actual, DEFAULT_TIMELINE_SETTINGS);
-            expect(timelineManager.getDay).toHaveBeenCalledWith(date, TimelineMode.Plan, DEFAULT_TIMELINE_SETTINGS);
-            expect(result.map(column => column.mode)).toEqual([TimelineMode.Actual, TimelineMode.Plan]);
-            expect(result.every(column => column.day === day)).toBe(true);
+            expect(result.mode).toBe(TimelineMode.Actual);
+            expect(result.day).toBe(day);
+            expect(result.error).toBeNull();
         });
 
-        it('should keep one side readable when the other fails', async () => {
+        it('should keep a failure in the side that caused it', async () => {
             // Arrange
             when(timelineManager.getDay).calledWith(date, TimelineMode.Plan, DEFAULT_TIMELINE_SETTINGS)
                 .mockRejectedValue(new Error('something went wrong'));
 
             // Act
-            const result = await viewModel.loadDay(date);
+            const plan = await viewModel.loadDay(date, TimelineMode.Plan);
+            const actual = await viewModel.loadDay(date, TimelineMode.Actual);
 
             // Assert
-            expect(result[0].day).toBe(day);
-            expect(result[0].error).toBeNull();
-            expect(result[1].day).toBeNull();
-            expect(result[1].error).toBe('something went wrong');
+            expect(plan.day).toBeNull();
+            expect(plan.error).toBe('something went wrong');
+            expect(actual.day).toBe(day);
+            expect(actual.error).toBeNull();
         });
 
         it('should point at the settings when no plan calendar has been picked', async () => {
@@ -93,10 +95,10 @@ describe('DefaultTimelineViewModel', () => {
                 .mockRejectedValue(error);
 
             // Act
-            const result = await viewModel.loadDay(date);
+            const result = await viewModel.loadDay(date, TimelineMode.Plan);
 
             // Assert
-            expect(result[1].error).toContain('설정에서');
+            expect(result.error).toContain('설정에서');
         });
 
         it('should point at full disk access when the database cannot be opened', async () => {
@@ -105,10 +107,10 @@ describe('DefaultTimelineViewModel', () => {
                 .mockRejectedValue(new Error('Error: unable to open database file'));
 
             // Act
-            const result = await viewModel.loadDay(date);
+            const result = await viewModel.loadDay(date, TimelineMode.Actual);
 
             // Assert
-            expect(result[0].error).toContain('전체 디스크 접근 권한');
+            expect(result.error).toContain('전체 디스크 접근 권한');
         });
     });
 });
