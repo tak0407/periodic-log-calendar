@@ -59,9 +59,12 @@ export class DateFnsDateRepository implements DateRepository {
             weekNumber = getWeek(firstDayOfWeek, {weekStartsOn: startOfWeekDay});
         }
 
-        const month = this.getMonth(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth());
+        // The month, quarter and year describe the date that was asked for, not the
+        // day the week starts on. Those differ whenever a week straddles a month
+        // boundary, and every caller passes the day it actually means. See ADR-002.
+        const month = this.getMonth(date.getFullYear(), date.getMonth());
         const quarter = this.getQuarter(month);
-        const year = this.getYear(firstDayOfWeek.getFullYear());
+        const year = this.getYear(date.getFullYear());
         const days = this.getDaysOfWeek(startOfWeekDay, firstDayOfWeek);
 
         return <Week>{
