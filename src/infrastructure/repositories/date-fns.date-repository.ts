@@ -27,7 +27,10 @@ export class DateFnsDateRepository implements DateRepository {
     }
 
     public getDayFromDate(date: Date): Period {
-        const formatter = new Intl.DateTimeFormat(undefined, {
+        // Pinned to 'en' so the calendar grid always shows western digits, even
+        // in locales that would otherwise render them in their own numerals.
+        // The month and year names are deliberately left on the system locale.
+        const formatter = new Intl.DateTimeFormat('en', {
             day: this.dayFormat,
         });
 

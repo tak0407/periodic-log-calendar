@@ -17,6 +17,7 @@ describe('DateFnsDateRepository', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     describe('getDayFromDate', () => {
@@ -48,6 +49,19 @@ describe('DateFnsDateRepository', () => {
                 date: date,
                 type: PeriodType.Day,
             });
+        });
+
+        it('should format the day number with the en locale, while the month and the year follow the system locale', () => {
+            // Arrange
+            const formatterSpy = jest.spyOn(Intl, 'DateTimeFormat');
+
+            // Act
+            repository.getWeekFromDate(DayOfWeek.Monday, WeekNumberStandard.ISO, new Date(2023, 9, 3));
+
+            // Assert
+            expect(formatterSpy).toHaveBeenCalledWith('en', {day: '2-digit'});
+            expect(formatterSpy).toHaveBeenCalledWith(undefined, {month: 'long'});
+            expect(formatterSpy).toHaveBeenCalledWith(undefined, {year: 'numeric'});
         });
     });
 
