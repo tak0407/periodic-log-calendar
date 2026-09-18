@@ -245,6 +245,16 @@
     --dnc-hour-line: var(--background-modifier-border);
     --dnc-minute-line: color-mix(in srgb, var(--background-modifier-border) 55%, transparent);
     --dnc-now: #ff3b30;
+    /* The surface this sits on. Sidebar leaves are painted with the secondary
+       background, not the primary one, and three things have to agree with it: the
+       pinned axis, the clock's label, and the wash a record's colour is mixed into.
+       Naming it once keeps them from drifting apart. */
+    --dnc-surface: var(--background-secondary);
+}
+
+/* Dragged out of the sidebar and into the main area, the surface underneath changes. */
+.workspace-split.mod-root .dnc-timeline {
+    --dnc-surface: var(--background-primary);
 }
 
 .dnc-timeline-empty {
@@ -295,7 +305,7 @@
     position: sticky;
     top: 0;
     z-index: 6;
-    background: var(--background-primary);
+    background: var(--dnc-surface);
     padding-bottom: 1px;
 }
 
@@ -360,7 +370,7 @@
    class, so they still win against the base rule. */
 .dnc-timeline button.dnc-timeline-block {
     --dnc-event-color: var(--dnc-home);
-    --dnc-event-bg: color-mix(in srgb, var(--dnc-event-color) 24%, var(--background-primary));
+    --dnc-event-bg: color-mix(in srgb, var(--dnc-event-color) 24%, var(--dnc-surface));
     position: absolute;
     z-index: 1;
     display: block;
@@ -450,7 +460,7 @@
     white-space: nowrap;
     padding: 0 2px;
     border-radius: 2px;
-    background: var(--background-primary);
+    background: var(--dnc-surface);
     color: var(--dnc-now);
     font-size: 8px;
     font-variant-numeric: tabular-nums;
