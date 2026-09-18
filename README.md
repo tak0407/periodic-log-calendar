@@ -1,10 +1,35 @@
-# Daily note calendar plugin
+# Periodic Log Calendar
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/bartkessels/daily-note-calendar)
 
-[![Build and test the daily-note-calendar plugin](https://github.com/bartkessels/daily-note-calendar/actions/workflows/build_test.yml/badge.svg)](https://github.com/bartkessels/daily-note-calendar/actions/workflows/build_test.yml)
-[![Release Obsidian plugin](https://github.com/bartkessels/daily-note-calendar/actions/workflows/release.yml/badge.svg)](https://github.com/bartkessels/daily-note-calendar/actions/workflows/release.yml)
+---
+
+## This is a modified fork
+
+**Periodic Log Calendar** (plugin id `periodic-log-calendar`) is a fork of
+[**Daily note calendar**](https://github.com/bartkessels/daily-note-calendar) by
+**Bart Kessels**, who wrote everything this plugin does with periodic notes. It is
+published under the GPL-3.0, the same licence as the original, and this file records
+that it has been modified and what was changed.
+
+Forked from upstream **2.8.0**. Modified by tak0407, from **September 2026**:
+
+| | Change |
+|---|---|
+| Plugin identity | `id` is `periodic-log-calendar` and `isDesktopOnly` is `true`, so this fork installs beside the original instead of replacing it, and stays off mobile — it shells out to `sqlite3`, which mobile has no way to run. |
+| Log and plan timeline | The area below the calendar has two tabs. *Notes* is the original view, unchanged and still the default. *Log & plan* puts the selected day's Apple Calendar records and plans on one time axis. |
+| Locale week days | The calendar header takes its day names from the system locale instead of hardcoded English abbreviations. |
+| Fixed day numbers | The day number in each cell is rendered with the `en` locale, so it stays in western digits. |
+| Year before month | The calendar header shows the year before the month, the order CJK locales write dates in. |
+| Week period bug fix | A week's month, quarter and year now follow the requested date rather than the day the week starts on. See [ADR-002](docs/adrs/ADR-002-derive-week-period-from-the-requested-date.md). |
+
+The *Log & plan* tab reads Apple Calendar through code ported from
+[**weekly-log-viewer**](https://github.com/tak0407/weekly-log-viewer) `1.4.0`, which is
+MIT licensed; the ported files carry that notice. It reads the calendar database
+**read-only** and never writes to it.
+
+Upstream is tracked on the `upstream` remote, and this fork keeps its changes in new
+files wherever it can so that merges stay cheap.
 
 ---
 

@@ -1,7 +1,7 @@
 {
-	"name": "daily-note-calendar",
-	"version": "2.8.0",
-	"description": "Navigate your Obsidian vault using a calendar view.",
+	"name": "periodic-log-calendar",
+	"version": "0.1.0",
+	"description": "Navigate your Obsidian vault using a calendar view, with each day's Apple Calendar log and plan on one time axis.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "tsx esbuild.config.mts",
@@ -12,7 +12,7 @@
 		"mutation": "stryker run stryker.config.mts"
 	},
 	"keywords": [],
-	"author": "Bart Kessels",
+	"author": "tak0407",
 	"license": "GPL-3.0-only",
 	"devDependencies": {
 		"@stryker-mutator/core": "^9.6.0",
