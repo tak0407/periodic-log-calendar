@@ -306,7 +306,7 @@
     top: 0;
     z-index: 6;
     background: var(--dnc-surface);
-    padding-bottom: 1px;
+    padding-bottom: 3px;
 }
 
 /* The hour is its own column, the records fill the rest of the width. */
@@ -316,19 +316,21 @@
     grid-template-columns: 2em 1fr;
 }
 
-/* The minute axis, named once at the top. */
+/* The minute axis, named once at the top. The original set this at 8px because it
+   had to fit seven day columns across a sidebar; one column per tab leaves room to
+   read it, so it follows Obsidian's own small UI size instead. */
 .dnc-timeline-ruler {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    color: var(--text-faint);
-    font-size: 8px;
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
     font-variant-numeric: tabular-nums;
-    line-height: 11px;
+    line-height: 1.7;
     text-align: left;
 }
 
 .dnc-timeline-ruler > span {
-    padding-left: 2px;
+    padding-left: 4px;
     border-left: 1px solid var(--dnc-minute-line);
 }
 
@@ -340,8 +342,8 @@
 .dnc-timeline-hour {
     display: grid;
     place-items: center;
-    color: var(--text-faint);
-    font-size: 10px;
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
     font-variant-numeric: tabular-nums;
     border-bottom: 1px solid var(--dnc-hour-line);
 }
@@ -435,7 +437,7 @@
 .dnc-timeline .dnc-timeline-block-title {
     display: block;
     overflow: hidden;
-    font-size: 10px;
+    font-size: var(--font-ui-smaller);
     font-weight: 600;
     line-height: calc(var(--dnc-timeline-band-height, 22px) - 1px);
     text-overflow: ellipsis;
@@ -462,7 +464,7 @@
     border-radius: 2px;
     background: var(--dnc-surface);
     color: var(--dnc-now);
-    font-size: 8px;
+    font-size: var(--font-ui-smaller);
     font-variant-numeric: tabular-nums;
 }
 
