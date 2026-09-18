@@ -308,6 +308,12 @@
     border-radius: 2px;
     font-size: var(--font-ui-smaller);
     line-height: 1;
+    /* Obsidian centres button content, which would float a name away from the
+       minute the record actually starts on. Flex pins it to the left edge and
+       centres it in the band's height at the same time. */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     text-align: left;
     white-space: nowrap;
     cursor: default;
