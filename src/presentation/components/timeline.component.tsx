@@ -79,16 +79,21 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
             ['--dnc-timeline-row-height' as string]: ROW_HEIGHT_IN_PX + 'px',
             ['--dnc-timeline-band-height' as string]: ROW_HEIGHT_IN_PX / Math.max(1, plan.bands) + 'px',
         }}>
-            {/* Reading a block off a native tooltip proved unreliable inside Obsidian,
-                so what is under the pointer is named here instead. The space is held
-                open so the grid does not jump as the pointer moves. */}
-            <p className="dnc-timeline-detail">{detail ?? ' '}</p>
+            {/* The axis and the name of whatever is under the pointer stay put
+                while the hours scroll past them: a name that scrolled out of
+                sight would not be telling anyone anything. */}
+            <div className="dnc-timeline-top">
+                {/* Reading a block off a native tooltip proved unreliable inside Obsidian,
+                    so what is under the pointer is named here instead. The space is held
+                    open so the grid does not jump as the pointer moves. */}
+                <p className="dnc-timeline-detail">{detail ?? '\u00a0'}</p>
 
-            <div className="dnc-timeline-head">
-                <span className="dnc-timeline-hour" />
-                <span className="dnc-timeline-ruler" aria-hidden="true">
-                    {MINUTE_MARKS.map(minute => <span key={minute}>{minute}</span>)}
-                </span>
+                <div className="dnc-timeline-head">
+                    <span className="dnc-timeline-hour" />
+                    <span className="dnc-timeline-ruler" aria-hidden="true">
+                        {MINUTE_MARKS.map(minute => <span key={minute}>{minute}</span>)}
+                    </span>
+                </div>
             </div>
 
             <div className="dnc-timeline-grid" onMouseLeave={() => setDetail(null)}>

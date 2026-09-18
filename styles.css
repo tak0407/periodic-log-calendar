@@ -262,6 +262,43 @@
     text-align: left;
 }
 
+/* The calendar and the tabs stay where they are; only the panel under them scrolls.
+   The view has to be a column of known height for that, which is why this reaches
+   for the leaf rather than styling the plugin's own markup alone.
+   ponytail: a sidebar shorter than the calendar clips it; give .dnc its own overflow if that ever happens. */
+.workspace-leaf-content[data-type="periodic-log-calendar"] .view-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.workspace-leaf-content[data-type="periodic-log-calendar"] .view-content > .dnc,
+.workspace-leaf-content[data-type="periodic-log-calendar"] .dnc-tabs {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.workspace-leaf-content[data-type="periodic-log-calendar"] .dnc-tab-list {
+    flex: none;
+}
+
+.workspace-leaf-content[data-type="periodic-log-calendar"] .dnc-tabs > [role="tabpanel"] {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* The minute axis and the name of what the pointer is on ride along with the scroll. */
+.dnc-timeline-top {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    background: var(--background-primary);
+    padding-bottom: 1px;
+}
+
 /* The hour is its own column, the records fill the rest of the width. */
 .dnc-timeline-head,
 .dnc-timeline-grid {
