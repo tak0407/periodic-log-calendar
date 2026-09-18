@@ -141,6 +141,7 @@ describe('TimelineComponent', () => {
         // Assert
         const mark = screen.getByLabelText('현재 시각 10:30');
         expect(mark.style.left).toBe('50%');
+        expect(mark.textContent).toBe('10:30');
         expect(screen.queryAllByLabelText(/현재 시각/)).toHaveLength(1);
         jest.useRealTimers();
     });
