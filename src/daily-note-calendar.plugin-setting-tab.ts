@@ -19,6 +19,7 @@ import {
 } from 'src/presentation/settings/period-notes/yearly-note.periodic-note.settings-view';
 import {DisplayNotesSettingsView} from 'src/presentation/settings/display-notes/display-notes.settings-view';
 import {GeneralSettingsView} from 'src/presentation/settings/general/general.settings-view';
+import {TimelineSettingsView} from 'src/presentation/settings/timeline/timeline.settings-view';
 
 export class DailyNoteCalendarPluginSettingTab extends PluginSettingTab {
     private readonly settings: SettingsView[] = [];
@@ -38,6 +39,7 @@ export class DailyNoteCalendarPluginSettingTab extends PluginSettingTab {
         this.settings.push(new MonthlyNotePeriodicNoteSettingsView(this, onSettingsChange, dateParserFactory, settingsRepositoryFactory));
         this.settings.push(new QuarterlyNotePeriodicNoteSettingsView(this, onSettingsChange, dateParserFactory, settingsRepositoryFactory));
         this.settings.push(new YearlyNotePeriodicNoteSettingsView(this, onSettingsChange, dateParserFactory, settingsRepositoryFactory));
+        this.settings.push(new TimelineSettingsView(this, onSettingsChange, settingsRepositoryFactory));
     }
 
     override async display(): Promise<void> {

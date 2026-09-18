@@ -10,6 +10,7 @@ import {MonthlyNoteSettingsRepository} from 'src/infrastructure/repositories/mon
 import {QuarterlyNoteSettingsRepository} from 'src/infrastructure/repositories/quarterly-note.settings-repository';
 import {YearlyNoteSettingsRepository} from 'src/infrastructure/repositories/yearly-note.settings-repository';
 import {DisplayNotesSettingsRepository} from 'src/infrastructure/repositories/display-notes.settings-repository';
+import {TimelineSettingsRepository} from 'src/infrastructure/repositories/timeline.settings-repository';
 
 export class DefaultSettingsRepositoryFactory implements SettingsRepositoryFactory {
     constructor(
@@ -36,6 +37,8 @@ export class DefaultSettingsRepositoryFactory implements SettingsRepositoryFacto
             return new QuarterlyNoteSettingsRepository(this.adapter) as unknown as SettingsRepository<T>;
         case SettingsType.YearlyNote:
             return new YearlyNoteSettingsRepository(this.adapter) as unknown as SettingsRepository<T>;
+        case SettingsType.Timeline:
+            return new TimelineSettingsRepository(this.adapter) as unknown as SettingsRepository<T>;
         }
     }
 }
