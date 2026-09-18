@@ -4,7 +4,7 @@ import {Period} from 'src/domain/models/period.model';
 import {hourValue, TimelineDay, TimelineItem, TimelineMode} from 'src/domain/models/timeline.model';
 import {TimelineColumn} from 'src/presentation/contracts/timeline.view-model';
 import {useTimelineViewModel} from 'src/presentation/context/view-model.context';
-import {bandIndex, bandPlan, hourPiece, hourRows, TimelineLane} from 'src/presentation/timeline/timebox';
+import {bandIndex, bandPlan, BandPlan, hourPiece, hourRows, TimelineLane} from 'src/presentation/timeline/timebox';
 
 export interface TimelineComponentProperties {
     period: Period | null;
@@ -69,10 +69,14 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
     }
 
     const range = viewModel.getRange();
+    const plan = bandPlan(column.day ? [column.day] : [], range);
     const now = new Date();
 
     return (
-        <div className="dnc-timeline" style={{['--dnc-timeline-row-height' as string]: ROW_HEIGHT_IN_PX + 'px'}}>
+        <div className="dnc-timeline" style={{
+            ['--dnc-timeline-row-height' as string]: ROW_HEIGHT_IN_PX + 'px',
+            ['--dnc-timeline-band-height' as string]: ROW_HEIGHT_IN_PX / Math.max(1, plan.bands) + 'px',
+        }}>
             {/* The axis stays put while the hours scroll past it: an axis you cannot
                 see is not an axis. */}
             <div className="dnc-timeline-top">
@@ -90,6 +94,7 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
                         <span className="dnc-timeline-hour">{hour.toString().padStart(2, '0')}</span>
                         <TimelineCell
                             day={column.day}
+                            plan={plan}
                             hour={hour}
                             rangeStart={range.start}
                             now={now} />
@@ -102,6 +107,7 @@ export const TimelineComponent = (props: TimelineComponentProperties): ReactElem
 
 interface TimelineCellProperties {
     day: TimelineDay | null;
+    plan: BandPlan;
     hour: number;
     rangeStart: number;
     now: Date;
@@ -109,18 +115,15 @@ interface TimelineCellProperties {
 
 const TimelineCell = (props: TimelineCellProperties): ReactElement => {
     const day = props.day;
-    // Counted for this row rather than for the whole day. The original shared one
-    // count across the day so a band sat at the same height in the record column and
-    // the plan column; those are separate tabs here, so nothing is left to line up
-    // with, and reserving a lane all day for an hour that has none only leaves a hole.
-    const plan = bandPlan(day ? [day] : [], {start: props.hour, end: props.hour + 1});
-    const bandHeight = ROW_HEIGHT_IN_PX / Math.max(1, plan.bands);
+    // Counted once for the whole day, not for this row: a band keeps the same height
+    // in every row, so a record does not change thickness as you read down the day.
+    const bandHeight = ROW_HEIGHT_IN_PX / Math.max(1, props.plan.bands);
     const nowHour = hourValue(props.now);
     // The clock belongs to today alone, and is a mark across the one cell it falls in.
     const showsNow = day?.today && nowHour >= props.hour && nowHour < props.hour + 1;
 
     return (
-        <span className="dnc-timeline-cell" style={{['--dnc-timeline-band-height' as string]: bandHeight + 'px'}}>
+        <span className="dnc-timeline-cell">
             {day && LANES.map(([lane, key]) => day[key].map((item, index) => {
                 const piece = hourPiece(item, props.hour, props.rangeStart);
 
@@ -142,7 +145,7 @@ const TimelineCell = (props: TimelineCellProperties): ReactElement => {
                         style={{
                             left: piece.left + '%',
                             width: piece.width + '%',
-                            top: bandIndex(plan, lane, item.column) * bandHeight + 'px',
+                            top: bandIndex(props.plan, lane, item.column) * bandHeight + 'px',
                             height: Math.max(4, bandHeight - 1) + 'px',
                         }}>
                         {!piece.continued && <span className="dnc-timeline-block-title">{item.name}</span>}
