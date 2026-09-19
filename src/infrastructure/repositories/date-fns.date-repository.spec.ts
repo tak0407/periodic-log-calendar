@@ -17,6 +17,7 @@ describe('DateFnsDateRepository', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     describe('getDayFromDate', () => {
@@ -48,6 +49,19 @@ describe('DateFnsDateRepository', () => {
                 date: date,
                 type: PeriodType.Day,
             });
+        });
+
+        it('should format the day number with the en locale, while the month and the year follow the system locale', () => {
+            // Arrange
+            const formatterSpy = jest.spyOn(Intl, 'DateTimeFormat');
+
+            // Act
+            repository.getWeekFromDate(DayOfWeek.Monday, WeekNumberStandard.ISO, new Date(2023, 9, 3));
+
+            // Assert
+            expect(formatterSpy).toHaveBeenCalledWith('en', {day: '2-digit'});
+            expect(formatterSpy).toHaveBeenCalledWith(undefined, {month: 'long'});
+            expect(formatterSpy).toHaveBeenCalledWith(undefined, {year: 'numeric'});
         });
     });
 
@@ -405,6 +419,45 @@ describe('DateFnsDateRepository', () => {
                 date: new Date(2023, 9, 8),
                 type: PeriodType.Day,
             });
+        });
+    });
+
+    describe('getWeekFromDate across a month boundary', () => {
+        // 2023-01-01 is a Sunday, so with a monday-based week it belongs to the
+        // week that starts on 2022-12-26. The month, quarter and year describe
+        // the date that was asked for, not the day the week happens to start on.
+        const newYearsDay = new Date(2023, 0, 1);
+
+        it('should return the month, quarter and year of the requested date', () => {
+            // Act
+            const result = repository.getWeekFromDate(DayOfWeek.Monday, WeekNumberStandard.ISO, newYearsDay);
+
+            // Assert
+            expect(result.month).toEqual(<Period>{
+                name: 'January',
+                date: new Date(2023, 0),
+                type: PeriodType.Month,
+            });
+            expect(result.quarter).toEqual(<Period>{
+                name: 'Q1',
+                date: new Date(2023, 0, 1),
+                type: PeriodType.Quarter,
+            });
+            expect(result.year).toEqual(<Period>{
+                name: '2023',
+                date: new Date(2023, 0),
+                type: PeriodType.Year,
+            });
+        });
+
+        it('should keep the first day of the week as the date of the week itself', () => {
+            // Act
+            const result = repository.getWeekFromDate(DayOfWeek.Monday, WeekNumberStandard.ISO, newYearsDay);
+
+            // Assert
+            expect(result.date).toEqual(new Date(2022, 11, 26));
+            expect(result.days[0].date).toEqual(new Date(2022, 11, 26));
+            expect(result.days[6].date).toEqual(newYearsDay);
         });
     });
 

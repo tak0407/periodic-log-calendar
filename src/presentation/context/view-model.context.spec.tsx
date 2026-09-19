@@ -8,7 +8,7 @@ import {
     ViewModelsContext,
 } from 'src/presentation/context/view-model.context';
 import {renderHook} from '@testing-library/react';
-import {mockCalendarViewModel, mockDayNoteViewModel, mockNotesViewModel, mockPeriodNoteViewModel} from 'src/test-helpers/view-model.mocks';
+import {mockCalendarViewModel, mockDayNoteViewModel, mockNotesViewModel, mockTimelineViewModel, mockPeriodNoteViewModel} from 'src/test-helpers/view-model.mocks';
 import {ReactNode} from 'react';
 
 describe('ViewModelContext', () => {
@@ -20,6 +20,7 @@ describe('ViewModelContext', () => {
         quarterlyNoteViewModel: {...mockPeriodNoteViewModel},
         yearlyNoteViewModel: {...mockPeriodNoteViewModel},
         notesViewModel: mockNotesViewModel,
+        timelineViewModel: mockTimelineViewModel,
     } as ViewModelsContext;
 
     describe('useCalendarViewModel', () => {

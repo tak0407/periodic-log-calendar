@@ -3,7 +3,7 @@ import {render, act, screen} from '@testing-library/react';
 import {NotesComponent} from 'src/presentation/components/notes.component';
 import {ViewModelsContext} from 'src/presentation/context/view-model.context';
 import {ViewModelsContext as ViewModelsContextType} from 'src/presentation/context/view-model.context';
-import {mockCalendarViewModel, mockDayNoteViewModel, mockPeriodNoteViewModel, mockNotesViewModel} from 'src/test-helpers/view-model.mocks';
+import {mockCalendarViewModel, mockDayNoteViewModel, mockPeriodNoteViewModel, mockNotesViewModel, mockTimelineViewModel} from 'src/test-helpers/view-model.mocks';
 import {mockPeriod, mockNoteWithCreatedOnProperty} from 'src/test-helpers/model.mocks';
 import {Period, PeriodType} from 'src/domain/models/period.model';
 import {Note} from 'src/domain/models/note.model';
@@ -19,6 +19,7 @@ describe('NotesComponent', () => {
         quarterlyNoteViewModel: {...mockPeriodNoteViewModel},
         yearlyNoteViewModel: {...mockPeriodNoteViewModel},
         notesViewModel: mockNotesViewModel,
+        timelineViewModel: mockTimelineViewModel,
     };
 
     const wrapper = ({children}: {children: ReactNode}) => (

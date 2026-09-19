@@ -3,7 +3,7 @@ import {render, act, screen, fireEvent} from '@testing-library/react';
 import {CalendarComponent} from 'src/presentation/components/calendar.component';
 import {ViewModelsContext} from 'src/presentation/context/view-model.context';
 import {ViewModelsContext as ViewModelsContextType} from 'src/presentation/context/view-model.context';
-import {mockCalendarViewModel, mockDayNoteViewModel, mockPeriodNoteViewModel, mockNotesViewModel} from 'src/test-helpers/view-model.mocks';
+import {mockCalendarViewModel, mockDayNoteViewModel, mockPeriodNoteViewModel, mockNotesViewModel, mockTimelineViewModel} from 'src/test-helpers/view-model.mocks';
 import {mockPeriod} from 'src/test-helpers/model.mocks';
 import {Period, PeriodType} from 'src/domain/models/period.model';
 import {Calendar} from 'src/domain/models/calendar.model';
@@ -51,6 +51,7 @@ describe('CalendarComponent', () => {
         quarterlyNoteViewModel: {...mockPeriodNoteViewModel},
         yearlyNoteViewModel: {...mockPeriodNoteViewModel},
         notesViewModel: mockNotesViewModel,
+        timelineViewModel: mockTimelineViewModel,
     };
 
     const wrapper = ({children}: {children: ReactNode}) => (
@@ -136,6 +137,12 @@ describe('CalendarComponent', () => {
         const {container} = render(<CalendarComponent initialCalendar={mockCalendar} />, {wrapper});
 
         expect(container.textContent).toContain('2023');
+    });
+
+    it('renders the year before the month in the header', async () => {
+        const {container} = render(<CalendarComponent initialCalendar={mockCalendar} />, {wrapper});
+
+        expect(container.querySelector('.title')?.textContent).toBe('2023October');
     });
 
     it('renders quarter in table header', async () => {

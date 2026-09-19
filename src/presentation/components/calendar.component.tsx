@@ -1,7 +1,7 @@
 import React, {ReactElement} from 'react';
 import {CalendarHeart, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight} from 'lucide-react';
 import {useCalendarViewModel} from 'src/presentation/context/view-model.context';
-import {NotesComponent} from 'src/presentation/components/notes.component';
+import {PeriodTabsComponent} from 'src/presentation/components/period-tabs.component';
 import {MonthlyNoteComponent} from 'src/presentation/components/month.component';
 import { QuarterlyNoteComponent } from './quarter.component';
 import {YearlyNoteComponent} from 'src/presentation/components/year.component';
@@ -90,12 +90,13 @@ export const CalendarComponent = (props: CalendarComponentProperties): ReactElem
     return (
         <div className="dnc">
             <div className="header">
+                {/* Year before month, the order CJK locales write dates in. */}
                 <span className="title">
                     <h1>
-                        <MonthlyNoteComponent month={calendar.month} />
+                        <YearlyNoteComponent year={calendar.year} />
                     </h1>
                     <h1>
-                        <YearlyNoteComponent year={calendar.year} />
+                        <MonthlyNoteComponent month={calendar.month} />
                     </h1>
                 </span>
 
@@ -149,7 +150,7 @@ export const CalendarComponent = (props: CalendarComponentProperties): ReactElem
                 </tbody>
             </table>
 
-            <NotesComponent period={selectedPeriod}/>
+            <PeriodTabsComponent period={selectedPeriod}/>
         </div>
     );
 };

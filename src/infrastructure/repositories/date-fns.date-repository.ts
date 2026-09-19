@@ -27,7 +27,10 @@ export class DateFnsDateRepository implements DateRepository {
     }
 
     public getDayFromDate(date: Date): Period {
-        const formatter = new Intl.DateTimeFormat(undefined, {
+        // Pinned to 'en' so the calendar grid always shows western digits, even
+        // in locales that would otherwise render them in their own numerals.
+        // The month and year names are deliberately left on the system locale.
+        const formatter = new Intl.DateTimeFormat('en', {
             day: this.dayFormat,
         });
 
@@ -56,9 +59,12 @@ export class DateFnsDateRepository implements DateRepository {
             weekNumber = getWeek(firstDayOfWeek, {weekStartsOn: startOfWeekDay});
         }
 
-        const month = this.getMonth(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth());
+        // The month, quarter and year describe the date that was asked for, not the
+        // day the week starts on. Those differ whenever a week straddles a month
+        // boundary, and every caller passes the day it actually means. See ADR-002.
+        const month = this.getMonth(date.getFullYear(), date.getMonth());
         const quarter = this.getQuarter(month);
-        const year = this.getYear(firstDayOfWeek.getFullYear());
+        const year = this.getYear(date.getFullYear());
         const days = this.getDaysOfWeek(startOfWeekDay, firstDayOfWeek);
 
         return <Week>{

@@ -33,6 +33,7 @@ export default class DailyNoteCalendarPlugin extends Plugin {
             this.dependencies.quarterlyNoteViewModel,
             this.dependencies.yearlyNoteViewModel,
             this.dependencies.notesViewModel,
+            this.dependencies.timelineViewModel,
         );
 
         await this.initializePlugin();
@@ -61,6 +62,7 @@ export default class DailyNoteCalendarPlugin extends Plugin {
         this.dependencies.monthlyNoteViewModel.updateSettings(settings);
         this.dependencies.quarterlyNoteViewModel.updateSettings(settings);
         this.dependencies.yearlyNoteViewModel.updateSettings(settings);
+        this.dependencies.timelineViewModel.updateSettings(settings);
     }
 
     private handleSettingsChange(): void {

@@ -149,49 +149,280 @@
     color: var(--text-accent);
 }
 
-.dnc-skeleton {
-    background: linear-gradient(90deg, #ddda 40%, #efefefaa, #ddda 60%) right / 300% 100%;
-    animation: skeleton-loading 1.5s linear infinite;
+/* Tabs below the calendar, and the log and plan timelines behind two of them.
+
+   The timeline's look is ported from weekly-log-viewer 1.4.0 (MIT, Copyright (c)
+   2026 김경탁): a record is a pale wash of its own colour with that colour as a bar
+   down its leading edge, rather than a solid slab, so a full row of them still reads
+   as a grid. The palette and the color-mix recipes are the original's. */
+
+.dnc-tab-list {
+    display: flex;
+    gap: 0.2em;
+    border-bottom: 1px solid var(--background-modifier-border);
+    margin-bottom: 0.4em;
 }
 
-@keyframes skeleton-loading {
-    to {
-        background-position: left;
-    }
+/* Same prefix rule as the blocks below: Obsidian's button styling outranks a
+   single class. */
+.dnc-tabs button.dnc-tab {
+    flex: 1;
+    box-shadow: none;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0.3em 0.2em;
+    font-size: var(--font-ui-small);
+    color: var(--text-muted);
+    cursor: pointer;
 }
 
-.dnc-skeleton-text {
-    height: 100%;
-    margin-bottom: 0.5rem;
-    border-radius: 0.25rem;
+.dnc-tabs button.dnc-tab:hover {
+    color: var(--text-normal);
 }
 
-.dnc-skeleton-text-year {
-    min-width: 3em;
+.dnc-tabs button.dnc-tab.active {
+    color: var(--text-accent);
+    border-bottom: 2px solid var(--text-accent);
 }
 
-.dnc-skeleton-text-month {
-    min-width: 5em;
+.dnc-timeline {
+    --dnc-home: #70a98a;
+    --dnc-move: #d2a84f;
+    --dnc-work: #5b9bb6;
+    --dnc-place: #d6844c;
+    --dnc-focus: #8b5e83;
+    --dnc-plan: #0a84ff;
+    /* The timetable's own two rulers. The hour line closes a row; the minute line
+       marks the tens inside it and is lighter, so weight alone says which is which
+       without the minutes ever needing numbers inside the grid. */
+    --dnc-hour-line: var(--background-modifier-border);
+    --dnc-minute-line: color-mix(in srgb, var(--background-modifier-border) 55%, transparent);
+    --dnc-now: #ff3b30;
+    /* The surface this sits on. Sidebar leaves are painted with the secondary
+       background, not the primary one, and three things have to agree with it: the
+       pinned axis, the clock's label, and the wash a record's colour is mixed into.
+       Naming it once keeps them from drifting apart. */
+    --dnc-surface: var(--background-secondary);
 }
 
-.dnc-skeleton-button {
-    height: 100%;
-    display: inline-block;
-    min-width: 1.5em;
-    margin-left: 0.2rem;
-    margin-bottom: 0.5rem;
-    border-radius: 0.25rem;
+/* Dragged out of the sidebar and into the main area, the surface underneath changes. */
+.workspace-split.mod-root .dnc-timeline {
+    --dnc-surface: var(--background-primary);
 }
 
-.dnc-skeleton-week {
-    height: 1.5em;
+.dnc-timeline-empty {
+    font-size: var(--font-ui-small);
+    color: var(--text-muted);
+    padding: 0.6em 0.2em;
+    margin: 0;
 }
 
-.dnc-skeleton-calendar {
-    height: 15em;
-    min-width: 100%;
-    display: inline-block;
-    margin-bottom: 0.5rem;
-    margin-top: 0.5rem;
-    border-radius: 0.25rem;
+.dnc-timeline-error {
+    display: block;
+    font-style: normal;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-error);
+    text-align: left;
+}
+
+/* The calendar and the tabs stay where they are; only the panel under them scrolls.
+   The view has to be a column of known height for that, which is why this reaches
+   for the leaf rather than styling the plugin's own markup alone.
+   ponytail: a sidebar shorter than the calendar clips it; give .dnc its own overflow if that ever happens. */
+.workspace-leaf-content[data-type="periodic-log-calendar"] .view-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.workspace-leaf-content[data-type="periodic-log-calendar"] .view-content > .dnc,
+.workspace-leaf-content[data-type="periodic-log-calendar"] .dnc-tabs {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.workspace-leaf-content[data-type="periodic-log-calendar"] .dnc-tab-list {
+    flex: none;
+}
+
+.workspace-leaf-content[data-type="periodic-log-calendar"] .dnc-tabs > [role="tabpanel"] {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* The minute axis and the name of what the pointer is on ride along with the scroll. */
+.dnc-timeline-top {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    background: var(--dnc-surface);
+    padding-bottom: 3px;
+}
+
+/* The hour is its own column, the records fill the rest of the width. */
+.dnc-timeline-head,
+.dnc-timeline-grid {
+    display: grid;
+    grid-template-columns: 2em 1fr;
+}
+
+/* The minute axis, named once at the top. The original set this at 8px because it
+   had to fit seven day columns across a sidebar; one column per tab leaves room to
+   read it, so it follows Obsidian's own small UI size instead. */
+.dnc-timeline-ruler {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.7;
+    text-align: left;
+}
+
+.dnc-timeline-ruler > span {
+    padding-left: 4px;
+    border-left: 1px solid var(--dnc-minute-line);
+}
+
+.dnc-timeline-ruler > span:first-child {
+    padding-left: 0;
+    border-left: 0;
+}
+
+.dnc-timeline-hour {
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid var(--dnc-hour-line);
+}
+
+/* One hour. Left to right inside it is the sixty minutes of that hour, marked every
+   ten — which is why the minutes never need numbering here. */
+.dnc-timeline-cell {
+    position: relative;
+    display: block;
+    height: var(--dnc-timeline-row-height);
+    border-bottom: 1px solid var(--dnc-hour-line);
+    border-left: 1px solid var(--dnc-hour-line);
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent 0,
+        transparent calc(100% / 6 - 1px),
+        var(--dnc-minute-line) calc(100% / 6 - 1px),
+        var(--dnc-minute-line) calc(100% / 6)
+    );
+}
+
+/* Every one of these is written as `.dnc-timeline button.dnc-timeline-block` on
+   purpose. Obsidian styles its buttons with enough specificity to beat a single
+   class, which silently drops background, colour, border and padding and leaves the
+   record wearing Obsidian's grey. The modifiers carry the same prefix plus their own
+   class, so they still win against the base rule. */
+.dnc-timeline button.dnc-timeline-block {
+    --dnc-event-color: var(--dnc-home);
+    --dnc-event-bg: color-mix(in srgb, var(--dnc-event-color) 24%, var(--dnc-surface));
+    position: absolute;
+    z-index: 1;
+    display: block;
+    min-width: 5px;
+    overflow: hidden;
+    padding: 0 3px 0 6px;
+    border: 0;
+    border-radius: 2px;
+    background: var(--dnc-event-bg);
+    box-shadow: none;
+    color: color-mix(in srgb, var(--dnc-event-color) 50%, var(--text-normal));
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* The leading edge, so a record reads as starting at a moment rather than filling a box. */
+.dnc-timeline button.dnc-timeline-block::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    background: var(--dnc-event-color);
+    content: '';
+}
+
+.dnc-timeline button.dnc-timeline-block.home { --dnc-event-color: var(--dnc-home); }
+.dnc-timeline button.dnc-timeline-block.move { --dnc-event-color: var(--dnc-move); }
+.dnc-timeline button.dnc-timeline-block.work { --dnc-event-color: var(--dnc-work); }
+.dnc-timeline button.dnc-timeline-block.place { --dnc-event-color: var(--dnc-place); }
+.dnc-timeline button.dnc-timeline-block.focus { --dnc-event-color: var(--dnc-focus); }
+.dnc-timeline button.dnc-timeline-block.plan { --dnc-event-color: var(--dnc-plan); }
+
+/* A piece carried in from an earlier row has no edge of its own: it did not start
+   here, so it is not given a leading bar or a rounded corner to pretend it did. */
+.dnc-timeline button.dnc-timeline-block.continued {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-left: 3px;
+}
+
+.dnc-timeline button.dnc-timeline-block.continued::before {
+    content: none;
+}
+
+.dnc-timeline button.dnc-timeline-block.continues {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.dnc-timeline button.dnc-timeline-block.active {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dnc-event-color) 55%, transparent);
+}
+
+.dnc-timeline button.dnc-timeline-block:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -1px;
+    z-index: 5;
+}
+
+.dnc-timeline .dnc-timeline-block-title {
+    display: block;
+    overflow: hidden;
+    font-size: var(--font-ui-smaller);
+    font-weight: 600;
+    line-height: calc(var(--dnc-timeline-band-height, 22px) - 1px);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The clock crosses the one cell it falls in, at the minute it falls on. */
+.dnc-timeline-now {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 0;
+    border-left: 2px solid var(--dnc-now);
+    pointer-events: none;
+}
+
+.dnc-timeline-now > span {
+    position: absolute;
+    top: 0;
+    left: 2px;
+    white-space: nowrap;
+    padding: 0 2px;
+    border-radius: 2px;
+    background: var(--dnc-surface);
+    color: var(--dnc-now);
+    font-size: var(--font-ui-smaller);
+    font-variant-numeric: tabular-nums;
+}
+
+.dnc-timeline-now.flipped > span {
+    left: auto;
+    right: 2px;
 }

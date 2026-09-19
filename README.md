@@ -1,10 +1,35 @@
-# Daily note calendar plugin
+# Periodic Log Calendar
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/bartkessels/daily-note-calendar)
 
-[![Build and test the daily-note-calendar plugin](https://github.com/bartkessels/daily-note-calendar/actions/workflows/build_test.yml/badge.svg)](https://github.com/bartkessels/daily-note-calendar/actions/workflows/build_test.yml)
-[![Release Obsidian plugin](https://github.com/bartkessels/daily-note-calendar/actions/workflows/release.yml/badge.svg)](https://github.com/bartkessels/daily-note-calendar/actions/workflows/release.yml)
+---
+
+## This is a modified fork
+
+**Periodic Log Calendar** (plugin id `periodic-log-calendar`) is a fork of
+[**Daily note calendar**](https://github.com/bartkessels/daily-note-calendar) by
+**Bart Kessels**, who wrote everything this plugin does with periodic notes. It is
+published under the GPL-3.0, the same licence as the original, and this file records
+that it has been modified and what was changed.
+
+Forked from upstream **2.8.0**. Modified by tak0407, from **September 2026**:
+
+| | Change |
+|---|---|
+| Plugin identity | `id` is `periodic-log-calendar` and `isDesktopOnly` is `true`, so this fork installs beside the original instead of replacing it, and stays off mobile — it shells out to `sqlite3`, which mobile has no way to run. |
+| Log and plan timeline | The area below the calendar has two tabs. *Notes* is the original view, unchanged and still the default. *Log & plan* puts the selected day's Apple Calendar records and plans on one time axis. |
+| Locale week days | The calendar header takes its day names from the system locale instead of hardcoded English abbreviations. |
+| Fixed day numbers | The day number in each cell is rendered with the `en` locale, so it stays in western digits. |
+| Year before month | The calendar header shows the year before the month, the order CJK locales write dates in. |
+| Week period bug fix | A week's month, quarter and year now follow the requested date rather than the day the week starts on. See [ADR-002](docs/adrs/ADR-002-derive-week-period-from-the-requested-date.md). |
+
+The *Log & plan* tab reads Apple Calendar through code ported from
+[**weekly-log-viewer**](https://github.com/tak0407/weekly-log-viewer) `1.4.0`, which is
+MIT licensed; the ported files carry that notice. It reads the calendar database
+**read-only** and never writes to it.
+
+Upstream is tracked on the `upstream` remote, and this fork keeps its changes in new
+files wherever it can so that merges stay cheap.
 
 ---
 
@@ -29,6 +54,7 @@ write my own plugin which allows you to customize the format of your daily and e
         - [1.4.3 Navigate to the next or previous month](#143-navigate-to-the-next-or-previous-month)
         - [1.4.4 Display the current note in calendar](#144-display-the-current-note-in-calendar)
     - [1.5 Displaying notes created on a specific day](#14-displaying-notes-created-on-a-specific-day)
+    - [1.6 The log and plan timeline](#16-the-log-and-plan-timeline)
 - [2. External dependencies](#2-external-dependencies)
 - [3. Build and test](#3-build-and-test)
 - [4. Contribute](#4-contribute)
@@ -167,6 +193,34 @@ When you've enabled the feature to display notes created on a specific day, you 
 This will highlight the date of the current note in the calendar, and below the calendar all notes that are created on the same date as the currently opened note.
 
 The command will either use the date that the note was created on, or the property specified in the plugin settings.
+
+## 1.6 The log and plan timeline
+
+*This section describes a feature of this fork that upstream does not have.*
+
+The area below the calendar has two tabs. **Notes** is the view described above and is
+the one you land on. **기록·계획** (log & plan) puts the selected day's Apple Calendar
+records beside its plans on one set of hour rows: an hour is a row in both columns, and
+across a cell, left to right, are that hour's sixty minutes. A record that spans several
+rows is named on the row it starts on and carries the colour alone through the rest, so
+one stretch reads as one thing.
+
+The left column is what happened, read from two calendars: a *location* calendar of
+where you were, and a *focus* calendar of what you were doing. Stays in the same place
+less than two minutes apart are joined, and a stay that is still open — recorded with no
+end time — is drawn up to the current moment for as long as nothing newer follows it.
+The right column is what was planned, read from whichever calendars you pick.
+
+Set all of this under **Settings → Log & plan**. Overlapping records get a lane each
+rather than hiding one another, so a busy hour stays readable.
+
+**What it needs.** macOS, the desktop app, and Full Disk Access for Obsidian
+(System Settings → Privacy & Security → Full Disk Access) so that `sqlite3` can open the
+Calendar database. The tab says what is missing rather than failing if any of that is
+not in place, and it asks nothing of the calendar at all until you open it.
+
+**The database is only ever read.** `sqlite3` is invoked with `-readonly`, and the
+plugin has no code that writes to Apple Calendar.
 
 # 2. External dependencies
 

@@ -101,7 +101,11 @@ export class DefaultCalendarViewModel implements CalendarViewModel {
     }
 
     private buildWeekDays(firstDayOfWeek: DayOfWeek): string[] {
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const formatter = new Intl.DateTimeFormat(undefined, {weekday: 'short'});
+
+        // 2024-01-07 is a Sunday, so the array is indexed by DayOfWeek (Sunday = 0). See ADR-001.
+        const days = Array.from({length: 7}, (_, dayOfWeek) => formatter.format(new Date(2024, 0, 7 + dayOfWeek)));
+
         return [...days.slice(firstDayOfWeek), ...days.slice(0, firstDayOfWeek)];
     }
 }
