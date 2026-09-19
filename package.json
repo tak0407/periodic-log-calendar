@@ -9,6 +9,7 @@
 		"lint": "eslint src/",
 		"version": "tsx version-bump.mts && git add manifest.json versions.json",
 		"test": "jest --detectOpenHandles",
+		"preview": "tsx preview.mts",
 		"mutation": "stryker run stryker.config.mts"
 	},
 	"keywords": [],
