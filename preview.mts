@@ -150,6 +150,20 @@ class PreviewEventRepository implements CalendarEventRepository {
     public getEventsForDay(_day: Date, _mode: TimelineMode, _settings: unknown): Promise<CalendarEventRow[]> {
         return this.failure ? Promise.reject(this.failure) : Promise.resolve(this.rows);
     }
+
+    // A preview draws; it never writes. Nothing in a run clicks save, and if
+    // something ever does, this says so rather than pretending it worked.
+    public createEvent(): Promise<void> {
+        return Promise.reject(new Error('The preview writes nothing.'));
+    }
+
+    public updateEvent(): Promise<void> {
+        return Promise.reject(new Error('The preview writes nothing.'));
+    }
+
+    public deleteEvent(): Promise<void> {
+        return Promise.reject(new Error('The preview writes nothing.'));
+    }
 }
 
 const periodNoteViewModel = {
@@ -180,6 +194,7 @@ const viewModels = (notes: Note[], rows: CalendarEventRow[], failure: Error | nu
 
     const timelineViewModel = new DefaultTimelineViewModel(
         new RepositoryTimelineManager(new PreviewEventRepository(rows, failure)),
+        {show: (message: string): void => console.error('notice: ' + message)},
     );
     timelineViewModel.updateSettings(DEFAULT_PLUGIN_SETTINGS);
 
