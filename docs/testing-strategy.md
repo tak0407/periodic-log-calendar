@@ -33,7 +33,7 @@ See [mutation-testing.md](mutation-testing.md) for details on mutation testing a
 ### What We Don't Test
 - **Infrastructure adapters** - Direct Obsidian API wrappers; mocking them creates false confidence
 - **Plugin lifecycle** - Integration composition; requires manual Obsidian validation
-- **React components** - Thin rendering over tested view models
+- **React components** - Thin rendering over tested view models; looked at through `npm run preview` (see [Preview Images](#preview-images))
 - **Settings UI** - Pure Obsidian UI delegation
 - **Command definitions** - Thin wrappers over tested command handlers
 
@@ -322,6 +322,23 @@ npm run mutation                  # Run mutation tests (~3 minutes)
 ```bash
 npm run build                     # TypeScript compilation + bundle
 ```
+
+### Preview Images
+```bash
+npm run preview                   # Draw the view into preview/*.png
+```
+
+No test layer paints, so nothing above tells you whether the screen still
+looks right. `preview.mts` renders the real components over invented data —
+the note tab, the log and plan tabs, an empty side, a failed read and a day
+with no notes, in both themes — and writes them as images. The clock is
+frozen at a constant, so two runs produce byte-identical files: a diff
+against the previous run is a regression check for the view, which is how
+the same tool caught a silent change in `weekly-log-viewer`.
+
+Nothing in it may point at real data. The Apple Calendar repository is
+replaced by a stub answering from arrays in the script, and no vault is
+opened. `preview/` is ignored by git.
 
 ## Continuous Integration
 
