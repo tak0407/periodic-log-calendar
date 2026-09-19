@@ -62,4 +62,8 @@ export const mockTimelineViewModel = {
     isSupported: jest.fn(),
     getRange: jest.fn(),
     loadDay: jest.fn(),
+    getPlanCalendars: jest.fn(),
+    createEvent: jest.fn(),
+    updateEvent: jest.fn(),
+    deleteEvent: jest.fn(),
 } as jest.Mocked<TimelineViewModel>;

@@ -1,4 +1,4 @@
-import {HourRange, TimelineDay, TimelineItem} from 'src/domain/models/timeline.model';
+import {DAY_END, DAY_START, HourRange, TimelineDay, TimelineItem} from 'src/domain/models/timeline.model';
 
 // Ported from weekly-log-viewer (https://github.com/tak0407/weekly-log-viewer) 1.4.0,
 // src/timebox.js, MIT licensed, Copyright (c) 2026 김경탁.
@@ -17,6 +17,12 @@ import {HourRange, TimelineDay, TimelineItem} from 'src/domain/models/timeline.m
 export const MIN_PIECE_PERCENT = 3;
 
 export type TimelineLane = 'location' | 'focus';
+
+// What a press on a record took hold of: the whole thing, or one of its ends.
+export type GrabEdge = 'move' | 'start' | 'end';
+
+// How close to an end counts as having taken hold of it.
+export const EDGE_IN_PX = 6;
 
 export interface HourPiece {
     left: number;
@@ -37,7 +43,7 @@ export interface BandPlan {
 // `continued` and `continues` say the item began before this row or runs past it,
 // which is what lets a long record read as one stretch across several rows without a
 // row pretending it starts or ends there.
-export function hourPiece(item: TimelineItem, hour: number, rangeStart?: number): HourPiece | null {
+export function hourPiece(item: Pick<TimelineItem, 'visualStart' | 'visualEnd'>, hour: number, rangeStart?: number): HourPiece | null {
     const from = Math.max(item.visualStart, hour);
     const to = Math.min(item.visualEnd, hour + 1);
 
@@ -59,6 +65,59 @@ export function hourPiece(item: TimelineItem, hour: number, rangeStart?: number)
         continued: firstDrawn < from,
         continues: item.visualEnd > to,
     };
+}
+
+// Where a pointer landed, as an hour of the day, rounded to a step a person would
+// have typed. Without it a drag lands on 09:37, which nobody meant.
+export function snapHour(hour: number, stepInMinutes: number): number {
+    const step = Math.max(1, stepInMinutes);
+    return Math.round(hour * 60 / step) * step / 60;
+}
+
+// An hour of the day on the clock. The end of a day reads as 24:00 rather than
+// rolling over to 00:00, because it is the end of the row it closes.
+export function clockText(hour: number): string {
+    const minutes = Math.round(hour * 60);
+    const pad = (value: number): string => value.toString().padStart(2, '0');
+
+    return pad(Math.floor(minutes / 60)) + ':' + pad(minutes % 60);
+}
+
+// Which part of a record the pointer took hold of. Only an end the record actually has
+// on this row can be grabbed — the edge of a piece carried in from an earlier row is
+// not the event's beginning — and a piece too narrow to have an inside is moved rather
+// than resized, because otherwise a short record could never be dragged anywhere.
+export function grabEdge(bounds: {left: number, right: number, width: number}, x: number, piece: HourPiece): GrabEdge {
+    if (!(bounds.width >= EDGE_IN_PX * 3)) {
+        return 'move';
+    }
+
+    if (!piece.continued && x - bounds.left <= EDGE_IN_PX) {
+        return 'start';
+    }
+
+    if (!piece.continues && bounds.right - x <= EDGE_IN_PX) {
+        return 'end';
+    }
+
+    return 'move';
+}
+
+// Where a grabbed record lands once the pointer has moved by `delta` hours. Moving
+// keeps its length and stops at the edges of the day rather than being squashed
+// against them; dragging one end leaves the other where it is and never lets the two
+// cross, so a record cannot be turned inside out.
+export function shiftSpan(span: HourRange, edge: GrabEdge, delta: number, minimum: number): HourRange {
+    if (edge === 'start') {
+        return {start: Math.max(DAY_START, Math.min(span.start + delta, span.end - minimum)), end: span.end};
+    }
+
+    if (edge === 'end') {
+        return {start: span.start, end: Math.min(DAY_END, Math.max(span.end + delta, span.start + minimum))};
+    }
+
+    const room = Math.max(DAY_START - span.start, Math.min(delta, DAY_END - span.end));
+    return {start: span.start + room, end: span.end + room};
 }
 
 // Which hours get a row. The window is whole hours, so the last row is the hour

@@ -2,6 +2,8 @@ import {addDays, isSameDay} from 'date-fns';
 import {TimelineManager} from 'src/business/contracts/timeline.manager';
 import {CalendarEventRepository} from 'src/infrastructure/contracts/calendar-event-repository';
 import {
+    CalendarEventDraft,
+    CalendarEventIdentity,
     CalendarEventRow,
     DAY_END,
     DAY_START,
@@ -10,6 +12,7 @@ import {
     TimelineItem,
     TimelineItemType,
     TimelineMode,
+    UNTITLED_EVENT,
 } from 'src/domain/models/timeline.model';
 import {TimelineSettings} from 'src/domain/settings/timeline.settings';
 
@@ -21,6 +24,7 @@ import {TimelineSettings} from 'src/domain/settings/timeline.settings';
 const STAY_MERGE_GAP_IN_MS = 120000;
 
 interface TimelineEvent {
+    uid: string;
     calendar: string;
     name: string;
     start: Date;
@@ -129,8 +133,9 @@ export function prepareDays(
 ): TimelineDay[] {
     const activeNow = now ? new Date(now) : new Date();
     const events: TimelineEvent[] = rows.map((row) => <TimelineEvent>{
+        uid: typeof row.uid === 'string' ? row.uid : '',
         calendar: row.calendar,
-        name: row.summary || '제목 없음',
+        name: row.summary || UNTITLED_EVENT,
         start: parseLocal(row.starts_at),
         end: parseLocal(row.ends_at),
         active: false,
@@ -175,6 +180,7 @@ export function prepareDays(
             }
 
             const item = <TimelineItem>{
+                uid: event.uid,
                 name: event.name,
                 calendar: event.calendar,
                 start: clippedStart,
@@ -185,6 +191,7 @@ export function prepareDays(
                     : event.calendar === settings.focusCalendar ? 'focus'
                         : locationType(event.name, settings),
                 active: event.active,
+                clipped: event.start < dayStart || event.end > dayEnd,
                 column: 0,
                 columns: 1,
             };
@@ -222,5 +229,17 @@ export class RepositoryTimelineManager implements TimelineManager {
     public async getDay(date: Date, mode: TimelineMode, settings: TimelineSettings): Promise<TimelineDay> {
         const rows = await this.calendarEventRepository.getEventsForDay(date, mode, settings);
         return prepareDays(rows, date, 1, mode, settings)[0];
+    }
+
+    public async createEvent(calendar: string, draft: CalendarEventDraft): Promise<void> {
+        await this.calendarEventRepository.createEvent(calendar, draft);
+    }
+
+    public async updateEvent(event: CalendarEventIdentity, draft: CalendarEventDraft): Promise<void> {
+        await this.calendarEventRepository.updateEvent(event, draft);
+    }
+
+    public async deleteEvent(event: CalendarEventIdentity): Promise<void> {
+        await this.calendarEventRepository.deleteEvent(event);
     }
 }

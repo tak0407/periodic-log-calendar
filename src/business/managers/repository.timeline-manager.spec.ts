@@ -22,8 +22,8 @@ describe('RepositoryTimelineManager', () => {
     const day = new Date(2023, 9, 2);
     const noon = new Date(2023, 9, 2, 12, 0, 0);
 
-    const row = (calendar: string, summary: string, startsAt: string, endsAt: string): CalendarEventRow =>
-        <CalendarEventRow>{calendar: calendar, summary: summary, starts_at: startsAt, ends_at: endsAt};
+    const row = (calendar: string, summary: string, startsAt: string, endsAt: string, uid = 'uid-' + summary): CalendarEventRow =>
+        <CalendarEventRow>{uid: uid, calendar: calendar, summary: summary, starts_at: startsAt, ends_at: endsAt};
 
     const item = (name: string, visualStart: number, visualEnd: number): TimelineItem => <TimelineItem>{
         name: name,
@@ -128,6 +128,18 @@ describe('RepositoryTimelineManager', () => {
     });
 
     describe('prepareDays', () => {
+        it('should mark a record that reaches outside the day it is drawn on', () => {
+            // Act
+            const result = prepareDays([
+                row('Where', 'Home', '2023-10-01 23:00:00', '2023-10-02 01:00:00'),
+                row('Where', 'Office', '2023-10-02 09:00:00', '2023-10-02 10:00:00'),
+            ], day, 1, TimelineMode.Actual, settings, noon);
+
+            // Assert
+            expect(result[0].locations.find(item => item.name === 'Home')?.clipped).toBe(true);
+            expect(result[0].locations.find(item => item.name === 'Office')?.clipped).toBe(false);
+        });
+
         it('should place an event by the wall clock rather than by elapsed seconds', () => {
             // Act
             const result = prepareDays([row('Where', 'Home', '2023-10-02 09:30:00', '2023-10-02 10:45:00')],
@@ -224,6 +236,9 @@ describe('RepositoryTimelineManager', () => {
         const repository = {
             isSupported: jest.fn(),
             getEventsForDay: jest.fn(),
+            createEvent: jest.fn(),
+            updateEvent: jest.fn(),
+            deleteEvent: jest.fn(),
         } as jest.Mocked<CalendarEventRepository>;
         let manager: RepositoryTimelineManager;
 
@@ -246,6 +261,52 @@ describe('RepositoryTimelineManager', () => {
             // Assert
             expect(result.date).toEqual(day);
             expect(result.locations.map(i => i.name)).toEqual(['Home']);
+        });
+
+        it('should carry the uid through, so the event can be found again to edit it', async () => {
+            // Arrange
+            when(repository.getEventsForDay).calledWith(day, TimelineMode.Actual, settings)
+                .mockResolvedValue([row('Where', 'Home', '2023-10-02 09:00:00', '2023-10-02 10:00:00', 'the-uid')]);
+
+            // Act
+            const result = await manager.getDay(day, TimelineMode.Actual, settings);
+
+            // Assert
+            expect(result.locations[0].uid).toBe('the-uid');
+        });
+
+        it('should pass a new event to the repository', async () => {
+            // Arrange
+            const draft = {summary: 'Lunch', start: new Date(2023, 9, 2, 12), end: new Date(2023, 9, 2, 13)};
+
+            // Act
+            await manager.createEvent('Plans', draft);
+
+            // Assert
+            expect(repository.createEvent).toHaveBeenCalledWith('Plans', draft);
+        });
+
+        it('should pass a changed event to the repository', async () => {
+            // Arrange
+            const identity = {calendar: 'Plans', uid: 'the-uid', summary: 'Lunch', start: new Date(2023, 9, 2, 12)};
+            const draft = {summary: 'Dinner', start: new Date(2023, 9, 2, 18), end: new Date(2023, 9, 2, 19)};
+
+            // Act
+            await manager.updateEvent(identity, draft);
+
+            // Assert
+            expect(repository.updateEvent).toHaveBeenCalledWith(identity, draft);
+        });
+
+        it('should pass a deleted event to the repository', async () => {
+            // Arrange
+            const identity = {calendar: 'Plans', uid: 'the-uid', summary: 'Lunch', start: new Date(2023, 9, 2, 12)};
+
+            // Act
+            await manager.deleteEvent(identity);
+
+            // Assert
+            expect(repository.deleteEvent).toHaveBeenCalledWith(identity);
         });
 
         it('should follow the repository on whether the platform is supported', () => {

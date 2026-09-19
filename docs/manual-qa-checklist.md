@@ -305,7 +305,9 @@ macOS machine with real calendars.
 ### Reading, and only reading
 - [ ] `Calendar.sqlitedb` modification time is unchanged after opening the tab many times
       (`stat -f %m ~/Library/Group\ Containers/group.com.apple.calendar/Calendar.sqlitedb` before and after)
-- [ ] Apple Calendar shows no new, changed or deleted events after a session with the tab open
+- [ ] Apple Calendar shows no new, changed or deleted events after a session of only reading the tab
+- [ ] After an edit, the change is in Apple Calendar itself and survives quitting and reopening
+      Calendar — the plugin wrote through the app, not into the database
 
 ### The day itself
 - [ ] Records appear in the left column and plans in the right, on the same hour rows
@@ -315,6 +317,38 @@ macOS machine with real calendars.
 - [ ] Two stays in the same place a minute apart are drawn as one
 - [ ] A record crossing midnight stops at the bottom of the day and continues on the next day
 - [ ] Selecting a different date redraws both columns
+
+### Editing
+- [ ] Nothing in the log tab can be dragged out, dragged around or pressed to edit
+- [ ] Dragging across empty time in the plan tab opens the editor on the span that was drawn, rounded to five minutes
+- [ ] The editor stands on the grid against the row it is about, and the rows behind it stay readable
+- [ ] Escape and 취소 close the editor without writing
+- [ ] The span is drawn on the grid while dragging and disappears when the pointer is released
+- [ ] Dragging upwards or to the left gives the same span as dragging the other way
+- [ ] Letting go of the pointer outside the grid makes nothing
+- [ ] Clicking without dragging opens no editor
+- [ ] Saving an event puts it in Apple Calendar at the right time, on the right calendar, and the tab redraws with it
+- [ ] The first edit of a session asks to control Calendar; refusing it shows the message pointing at Automation and leaves the day on screen
+- [ ] With several plan calendars set, the editor offers the choice; with one it does not
+- [ ] Pressing a record opens it for editing with its own title, date and times, and offers no calendar choice
+- [ ] Changing the title and the times writes both, and the tab redraws
+- [ ] Changing the date moves the event to that day: it leaves the day on screen and is there when that day is selected
+- [ ] Deleting removes it from Apple Calendar
+- [ ] Closing the editor with escape changes nothing
+- [ ] A record crossing midnight cannot be pressed or dragged, and is left to the Calendar app
+- [ ] An event with a quote or a backslash in its title saves with the title intact
+- [ ] An event typed as 23:30 to 00:30 is written as reaching into the next day
+- [ ] A start and an end typed the same are refused rather than written as a whole day
+
+### Dragging a record
+- [ ] Dragging a record by its middle moves it and keeps its length, in Apple Calendar too
+- [ ] Dragging it by its left or right end moves that end alone
+- [ ] The proposed time is drawn while dragging and the record settles there afterwards
+- [ ] A moved or resized record keeps its title — including one that had none, which is not renamed to 제목 없음
+- [ ] Dragging a record back to where it started writes nothing and opens the editor
+- [ ] A record that was dragged does not also open the editor when the pointer comes back down on it
+- [ ] An end cannot be dragged past the other end, and a record cannot be dragged past midnight
+- [ ] Letting go outside the grid leaves the record where it was
 
 ### Settings
 - [ ] Changing a calendar name in Settings → Log & plan changes what the tab reads

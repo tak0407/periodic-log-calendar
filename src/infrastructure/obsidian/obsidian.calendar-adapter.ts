@@ -2,7 +2,7 @@ import {execFile} from 'child_process';
 import {homedir} from 'os';
 import {join} from 'path';
 import {Platform} from 'obsidian';
-import {CalendarAdapter, sqliteArguments} from 'src/infrastructure/adapters/calendar.adapter';
+import {CalendarAdapter, osascriptArguments, sqliteArguments} from 'src/infrastructure/adapters/calendar.adapter';
 import {CalendarEventRow} from 'src/domain/models/timeline.model';
 
 // Ported from weekly-log-viewer (https://github.com/tak0407/weekly-log-viewer) 1.4.0,
@@ -14,9 +14,13 @@ import {CalendarEventRow} from 'src/domain/models/timeline.model';
 // module is never loaded anywhere without one.
 
 const SQLITE_BIN = '/usr/bin/sqlite3';
+const OSASCRIPT_BIN = '/usr/bin/osascript';
 const OPEN_BIN = '/usr/bin/open';
 const FULL_DISK_ACCESS_PANE = 'x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles';
 const QUERY_TIMEOUT_IN_MS = 15000;
+// The first write of a session waits on macOS asking whether Obsidian may control
+// Calendar, and that dialog is answered by a person, not by a program.
+const SCRIPT_TIMEOUT_IN_MS = 120000;
 const MAX_BUFFER_IN_BYTES = 1024 * 1024;
 
 export class ObsidianCalendarAdapter implements CalendarAdapter {
@@ -43,6 +47,24 @@ export class ObsidianCalendarAdapter implements CalendarAdapter {
                     } catch {
                         reject(new Error('Could not read the result of the Calendar query.'));
                     }
+                },
+            );
+        });
+    }
+
+    public runScript(script: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            execFile(
+                OSASCRIPT_BIN,
+                osascriptArguments(script),
+                {maxBuffer: MAX_BUFFER_IN_BYTES, timeout: SCRIPT_TIMEOUT_IN_MS},
+                (error, _, stderr) => {
+                    if (error) {
+                        reject(new Error((stderr || error.message).trim()));
+                        return;
+                    }
+
+                    resolve();
                 },
             );
         });

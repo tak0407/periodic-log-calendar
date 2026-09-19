@@ -270,6 +270,71 @@
     grid-template-columns: 2em 1fr;
 }
 
+/* Dragging a span of time across the grid would otherwise select the hour labels
+   along the way, which leaves the whole column highlighted blue. The editor is the
+   one thing inside the grid whose text is there to be typed in and selected. */
+.dnc-timeline-grid {
+    position: relative;
+    user-select: none;
+}
+
+/* The editor stands on the grid, under the row it is about, rather than in a dialog
+   in the middle of the window: the times being typed are the ones on the rows behind
+   it, and a dialog would cover them. */
+.dnc-timeline-editor {
+    position: absolute;
+    left: 2em;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    padding: 0.6em;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m, 6px);
+    background: var(--background-primary);
+    box-shadow: var(--shadow-s, 0 2px 10px rgba(0, 0, 0, 0.25));
+    font-size: var(--font-ui-small);
+    text-align: left;
+    user-select: text;
+}
+
+.dnc-timeline-editor-heading {
+    color: var(--text-muted);
+    font-weight: var(--font-semibold);
+}
+
+.dnc-timeline-editor label {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.dnc-timeline-editor input,
+.dnc-timeline-editor select {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--font-ui-small);
+}
+
+.dnc-timeline-editor-times {
+    display: flex;
+    gap: 0.5em;
+}
+
+.dnc-timeline-editor-times label {
+    flex: 1;
+}
+
+.dnc-timeline-editor-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4em;
+    padding-top: 0.2em;
+}
+
 /* The minute axis, named once at the top. The original set this at 8px because it
    had to fit seven day columns across a sidebar; one column per tab leaves room to
    read it, so it follows Obsidian's own small UI size instead. */
@@ -399,6 +464,40 @@
 }
 
 /* The clock crosses the one cell it falls in, at the minute it falls on. */
+/* A record that can be edited says so by the pointer: it can be taken hold of and
+   dragged to another time, or taken by an end and made longer or shorter. */
+.dnc-timeline button.dnc-timeline-block.editable {
+    cursor: grab;
+}
+
+.dnc-timeline button.dnc-timeline-block.editable:active {
+    cursor: grabbing;
+}
+
+/* The span being dragged. It is drawn over the full height of the row rather than in
+   a band, because it is not a record yet — it is the time being chosen. */
+.dnc-timeline-draft {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    border: 1px dashed var(--dnc-plan);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--dnc-plan) 18%, transparent);
+    pointer-events: none;
+}
+
+.dnc-timeline-draft > span {
+    position: absolute;
+    top: 0;
+    left: 3px;
+    white-space: nowrap;
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+}
+
 .dnc-timeline-now {
     position: absolute;
     top: 0;

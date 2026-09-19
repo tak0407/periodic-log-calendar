@@ -18,6 +18,7 @@ Forked from upstream **2.8.0**. Modified by tak0407, from **September 2026**:
 |---|---|
 | Plugin identity | `id` is `periodic-log-calendar` and `isDesktopOnly` is `true`, so this fork installs beside the original instead of replacing it, and stays off mobile — it shells out to `sqlite3`, which mobile has no way to run. |
 | Log and plan timeline | The area below the calendar has two tabs. *Notes* is the original view, unchanged and still the default. *Log & plan* puts the selected day's Apple Calendar records and plans on one time axis. |
+| Editing plans on the timeline | In the plan tab: drag across empty time to make an event, drag a record to move it or take it by an end to make it longer or shorter, press one to change or delete it. The log tab stays read-only, because a shortcut writes it. The change is handed to the Calendar app through AppleScript; the database itself is still only ever read. |
 | Locale week days | The calendar header takes its day names from the system locale instead of hardcoded English abbreviations. |
 | Fixed day numbers | The day number in each cell is rendered with the `en` locale, so it stays in western digits. |
 | Year before month | The calendar header shows the year before the month, the order CJK locales write dates in. |
@@ -25,8 +26,9 @@ Forked from upstream **2.8.0**. Modified by tak0407, from **September 2026**:
 
 The *Log & plan* tab reads Apple Calendar through code ported from
 [**weekly-log-viewer**](https://github.com/tak0407/weekly-log-viewer) `1.4.0`, which is
-MIT licensed; the ported files carry that notice. It reads the calendar database
-**read-only** and never writes to it.
+MIT licensed; the ported files carry that notice. It opens the calendar database
+**read-only**; an edit never touches that database but is handed to the Calendar app,
+which writes its own store.
 
 Upstream is tracked on the `upstream` remote, and this fork keeps its changes in new
 files wherever it can so that merges stay cheap.
@@ -214,13 +216,43 @@ The right column is what was planned, read from whichever calendars you pick.
 Set all of this under **Settings → Log & plan**. Overlapping records get a lane each
 rather than hiding one another, so a busy hour stays readable.
 
+**Only plans are edited here.** The log is what a shortcut recorded, and a record typed
+in by hand is not something that happened — so the log tab reads and nothing more. In
+the plan tab:
+
+**Making an event.** Drag across empty time on the grid — down the rows or across an
+hour — and an editor opens against the row you drew on, holding the span rounded to
+five minutes. Give it a title and save. It goes to the calendars you picked for plans
+under **Settings → Log & plan**, the same ones the tab reads; when you picked more than
+one, the editor asks which.
+
+**Changing one.** Press a record to open the same editor on it, with a **삭제** button
+beside save. Its date field moves the event to another day, which is the one thing the
+grid itself cannot do. The editor stands on the grid rather than in a dialog in the
+middle of the window, so the rows it is about stay visible behind it; escape or **취소**
+closes it without writing.
+
+**Dragging one.** Take a record anywhere in its middle and drag it to another time; it
+keeps its length and is written as soon as you let go, with no editor in the way — the
+span is the whole decision. Take it by either end instead and that end alone moves, so
+the record grows or shrinks against the other one. Both land on five-minute marks,
+neither can turn a record inside out or push it past midnight, and dragging one back to
+where it started writes nothing. A drag that leaves the grid is abandoned.
+
+A record that reaches outside the day on screen is left alone as well — its times on the
+grid are the day's edges rather than its own, so it belongs to the Calendar app.
+
 **What it needs.** macOS, the desktop app, and Full Disk Access for Obsidian
 (System Settings → Privacy & Security → Full Disk Access) so that `sqlite3` can open the
-Calendar database. The tab says what is missing rather than failing if any of that is
-not in place, and it asks nothing of the calendar at all until you open it.
+Calendar database. The first edit also asks to control Calendar; if you refuse it, turn
+it back on under System Settings → Privacy & Security → Automation. The tab says what is
+missing rather than failing if any of that is not in place, and it asks nothing of the
+calendar at all until you open it.
 
-**The database is only ever read.** `sqlite3` is invoked with `-readonly`, and the
-plugin has no code that writes to Apple Calendar.
+**The database is only ever read.** `sqlite3` is invoked with `-readonly`, and nothing
+in the plugin writes to that file. An edit goes to the Calendar app as AppleScript and
+the app writes its own store — a row written behind CalendarAgent's back would be lost
+at the next sync, or take the store's consistency with it.
 
 # 2. External dependencies
 

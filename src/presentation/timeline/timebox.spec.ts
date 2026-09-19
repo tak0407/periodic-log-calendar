@@ -2,9 +2,14 @@ import {
     bandCount,
     bandIndex,
     bandPlan,
+    clockText,
+    EDGE_IN_PX,
+    grabEdge,
     hourPiece,
+    shiftSpan,
     hourRows,
     MIN_PIECE_PERCENT,
+    snapHour,
 } from 'src/presentation/timeline/timebox';
 import {HourRange, TimelineDay, TimelineItem} from 'src/domain/models/timeline.model';
 
@@ -139,6 +144,100 @@ describe('timebox', () => {
             expect(bandIndex(plan, 'location', 0)).toBe(0);
             expect(bandIndex(plan, 'location', 1)).toBe(1);
             expect(bandIndex(plan, 'focus', 0)).toBe(2);
+        });
+    });
+
+    describe('snapHour', () => {
+        it('should round a pointer to the nearest step', () => {
+            // Act & Assert
+            expect(snapHour(9.53, 5)).toBe(9.5);
+            expect(snapHour(9.55, 5)).toBe(9 + 35 / 60);
+        });
+
+        it('should leave a time already on a step where it is', () => {
+            // Act & Assert
+            expect(snapHour(9.25, 5)).toBe(9.25);
+        });
+
+        it('should never divide by a step of nothing', () => {
+            // Act & Assert
+            expect(snapHour(9.4, 0)).toBe(9 + 24 / 60);
+        });
+    });
+
+    describe('clockText', () => {
+        it('should read an hour of the day off the clock', () => {
+            // Act & Assert
+            expect(clockText(9.5)).toBe('09:30');
+            expect(clockText(0)).toBe('00:00');
+        });
+
+        it('should close the day at 24:00 rather than rolling over', () => {
+            // Act & Assert
+            expect(clockText(24)).toBe('24:00');
+        });
+    });
+
+    describe('grabEdge', () => {
+        const bounds = {left: 100, right: 200, width: 100};
+        const whole = hourPiece(item(9, 10), 9, 6)!;
+        const carried = hourPiece(item(8, 11), 9, 6)!;
+
+        it('should take hold of the end the pointer is on', () => {
+            // Act & Assert
+            expect(grabEdge(bounds, 100 + EDGE_IN_PX, whole)).toBe('start');
+            expect(grabEdge(bounds, 200 - EDGE_IN_PX, whole)).toBe('end');
+        });
+
+        it('should take hold of the whole record anywhere in between', () => {
+            // Act & Assert
+            expect(grabEdge(bounds, 150, whole)).toBe('move');
+        });
+
+        it('should not offer an end the record does not have on this row', () => {
+            // Act & Assert
+            expect(grabEdge(bounds, 101, carried)).toBe('move');
+            expect(grabEdge(bounds, 199, carried)).toBe('move');
+        });
+
+        it('should move a piece too narrow to have an inside rather than resize it', () => {
+            // Act & Assert
+            expect(grabEdge({left: 100, right: 110, width: 10}, 101, whole)).toBe('move');
+        });
+    });
+
+    describe('shiftSpan', () => {
+        const span = <HourRange>{start: 9, end: 10};
+        const minimum = 1 / 12;
+
+        it('should keep the length of a record that is moved', () => {
+            // Act & Assert
+            expect(shiftSpan(span, 'move', 2, minimum)).toEqual({start: 11, end: 12});
+            expect(shiftSpan(span, 'move', -1.5, minimum)).toEqual({start: 7.5, end: 8.5});
+        });
+
+        it('should stop a moved record at the edge of the day rather than squash it', () => {
+            // Act & Assert
+            expect(shiftSpan(span, 'move', -20, minimum)).toEqual({start: 0, end: 1});
+            expect(shiftSpan(span, 'move', 20, minimum)).toEqual({start: 23, end: 24});
+        });
+
+        it('should leave the other end where it is when one end is dragged', () => {
+            // Act & Assert
+            expect(shiftSpan(span, 'start', -1, minimum)).toEqual({start: 8, end: 10});
+            expect(shiftSpan(span, 'end', 1, minimum)).toEqual({start: 9, end: 11});
+        });
+
+        it('should never let the two ends cross', () => {
+            // Act & Assert
+            expect(shiftSpan(span, 'start', 5, minimum)).toEqual({start: 10 - minimum, end: 10});
+            expect(shiftSpan(span, 'end', -5, minimum)).toEqual({start: 9, end: 9 + minimum});
+        });
+
+        it('should keep a dragged end inside the day', () => {
+            // Act & Assert
+            expect(shiftSpan(span, 'start', -20, minimum)).toEqual({start: 0, end: 10});
+            expect(shiftSpan(span, 'end', 20, minimum)).toEqual({start: 9, end: 24});
         });
     });
 });

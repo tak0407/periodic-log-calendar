@@ -92,7 +92,7 @@ export function getDependencies(plugin: Plugin): Dependencies {
     const quarterlyNoteViewModel = new QuarterPeriodNoteViewModel(periodService, messageAdapter);
     const yearlyNoteViewModel = new YearPeriodNoteViewModel(periodService, messageAdapter);
     const notesViewModel = new DefaultNotesViewModel(noteService);
-    const timelineViewModel = new DefaultTimelineViewModel(timelineManager);
+    const timelineViewModel = new DefaultTimelineViewModel(timelineManager, messageAdapter);
 
     const commandHandlerFactory = new DefaultCommandHandlerFactory(
         noteManagerFactory,

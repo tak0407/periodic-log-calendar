@@ -32,5 +32,6 @@ export const mockSettingsAdapter = {
 export const mockCalendarAdapter = {
     isSupported: jest.fn(),
     query: jest.fn(),
+    runScript: jest.fn(),
     openFullDiskAccessSettings: jest.fn(),
 } as jest.Mocked<CalendarAdapter>;
