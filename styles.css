@@ -254,6 +254,18 @@
     overflow-y: auto;
 }
 
+/* Obsidian draws its scrollbars itself, so they are the classic kind that takes room
+   rather than an overlay — and only this panel scrolls, so only this panel would be
+   narrower than the calendar above it, by a scrollbar. The bar is hidden instead:
+   wheel and trackpad still scroll, and the hour labels say where you are. */
+.workspace-leaf-content[data-type="periodic-log-calendar"] .dnc-tabs > [role="tabpanel"] {
+    scrollbar-width: none;
+}
+
+.workspace-leaf-content[data-type="periodic-log-calendar"] .dnc-tabs > [role="tabpanel"]::-webkit-scrollbar {
+    display: none;
+}
+
 /* The minute axis and the name of what the pointer is on ride along with the scroll. */
 .dnc-timeline-top {
     position: sticky;

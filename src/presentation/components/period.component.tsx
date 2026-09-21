@@ -11,6 +11,7 @@ interface PeriodComponentProperties {
     hasPeriodNote: boolean;
     noteCount?: number;
     onClick: (key: ModifierKey) => void;
+    onDoubleClick?: (key: ModifierKey) => void;
     onOpenInHorizontalSplitViewClick: (key: ModifierKey) => void;
     onOpenInVerticalSplitViewClick: (key: ModifierKey) => void;
     onDelete: () => void;
@@ -59,6 +60,10 @@ export const PeriodComponent = (props: PeriodComponentProperties): ReactElement 
             }}
             onClick={(e: React.MouseEvent) => {
                 props.onClick(modifierKey(e));
+                e.preventDefault();
+            }}
+            onDoubleClick={(e: React.MouseEvent) => {
+                props.onDoubleClick?.(modifierKey(e));
                 e.preventDefault();
             }}>
             {props.name}

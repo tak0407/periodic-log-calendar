@@ -44,6 +44,7 @@ export const mockDayNoteViewModel = {
     openNoteInVerticalSplitView: jest.fn(),
     deleteNote: jest.fn(),
     getNoteCount: jest.fn(),
+    opensNoteOnClick: jest.fn(),
 } as jest.Mocked<DayNoteViewModel>;
 
 export const mockNotesViewModel = {

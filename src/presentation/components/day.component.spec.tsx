@@ -1,5 +1,5 @@
 import React, {ReactNode} from 'react';
-import {render, act} from '@testing-library/react';
+import {render, act, fireEvent, screen} from '@testing-library/react';
 import {DailyNoteComponent} from 'src/presentation/components/day.component';
 import {ViewModelsContext} from 'src/presentation/context/view-model.context';
 import {mockDayNoteViewModel, mockPeriodNoteViewModel, mockCalendarViewModel, mockNotesViewModel, mockTimelineViewModel} from 'src/test-helpers/view-model.mocks';
@@ -200,5 +200,71 @@ describe('DailyNoteComponent', () => {
 
         // Assert
         expect(mockDayNoteViewModel.getNoteCount).toHaveBeenCalledWith(day);
+    });
+
+    describe('clicking the day', () => {
+        const renderDay = async (): Promise<void> => {
+            await act(async () => {
+                render(<DailyNoteComponent
+                    day={day}
+                    today={null}
+                    selectedPeriod={null}
+                    isSameMonth={true}
+                    noteCountToken={0}
+                    onSelect={onSelect} />, {wrapper});
+            });
+        };
+
+        it('should select the day and leave the note closed when a click only selects', async () => {
+            // Arrange
+            mockDayNoteViewModel.opensNoteOnClick.mockReturnValue(false);
+            await renderDay();
+
+            // Act
+            fireEvent.click(screen.getByText(day.name));
+
+            // Assert
+            expect(onSelect).toHaveBeenCalledWith(day);
+            expect(mockDayNoteViewModel.openNote).not.toHaveBeenCalled();
+        });
+
+        it('should open the note as well when the view model says a click does', async () => {
+            // Arrange
+            mockDayNoteViewModel.opensNoteOnClick.mockReturnValue(true);
+            await renderDay();
+
+            // Act
+            fireEvent.click(screen.getByText(day.name));
+
+            // Assert
+            expect(onSelect).toHaveBeenCalledWith(day);
+            expect(mockDayNoteViewModel.openNote).toHaveBeenCalledWith(expect.anything(), day);
+        });
+
+        it('should open the note on a double click when a click alone does not', async () => {
+            // Arrange
+            mockDayNoteViewModel.opensNoteOnClick.mockReturnValue(false);
+            await renderDay();
+
+            // Act
+            fireEvent.doubleClick(screen.getByText(day.name));
+
+            // Assert
+            expect(mockDayNoteViewModel.openNote).toHaveBeenCalledTimes(1);
+        });
+
+        it('should not open the note twice on a double click when the click already did', async () => {
+            // Arrange
+            mockDayNoteViewModel.opensNoteOnClick.mockReturnValue(true);
+            await renderDay();
+
+            // Act
+            fireEvent.click(screen.getByText(day.name));
+            fireEvent.click(screen.getByText(day.name));
+            fireEvent.doubleClick(screen.getByText(day.name));
+
+            // Assert
+            expect(mockDayNoteViewModel.openNote).toHaveBeenCalledTimes(2);
+        });
     });
 });

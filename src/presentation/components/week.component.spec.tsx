@@ -1,5 +1,5 @@
 import React, {ReactNode} from 'react';
-import {render, act} from '@testing-library/react';
+import {render, act, fireEvent, screen} from '@testing-library/react';
 import 'src/extensions/extensions';
 import {WeeklyNoteComponent} from 'src/presentation/components/week.component';
 import {ViewModelsContext} from 'src/presentation/context/view-model.context';
@@ -182,7 +182,7 @@ describe('WeeklyNoteComponent', () => {
         expect(container.textContent).toContain(week.name);
     });
 
-    it('calls onSelect when week is selected via PeriodComponent', async () => {
+    it('opens the weekly note on click and leaves the selected day alone', async () => {
         mockWeeklyViewModel.hasPeriodicNote.mockResolvedValue(false);
 
         await act(async () => {
@@ -204,8 +204,11 @@ describe('WeeklyNoteComponent', () => {
             );
         });
 
-        // Verify component rendered correctly
-        expect(mockWeeklyViewModel.hasPeriodicNote).toHaveBeenCalledWith(week);
+        fireEvent.click(document.querySelector('.weekNumber > div')!);
+
+        // The tabs below show one day, so a week is a way to its note and not a selection.
+        expect(mockWeeklyViewModel.openNote).toHaveBeenCalledWith(expect.anything(), week);
+        expect(onSelect).not.toHaveBeenCalled();
     });
 
     it('passes noteCountToken to DailyNoteComponent', async () => {

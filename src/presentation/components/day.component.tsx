@@ -2,7 +2,7 @@ import {arePeriodsEqual, Period} from 'src/domain/models/period.model';
 import React, {ReactElement} from 'react';
 import {useDailyNoteViewModel} from 'src/presentation/context/view-model.context';
 import {PeriodComponent} from 'src/presentation/components/period.component';
-import {isSelectModifierKey} from 'src/domain/models/modifier-key';
+import {ModifierKey} from 'src/domain/models/modifier-key';
 
 interface DailyNoteProperties {
     day: Period;
@@ -35,8 +35,15 @@ export const DailyNoteComponent = (props: DailyNoteProperties): ReactElement => 
             noteCount={noteCount}
             onClick={(key) => {
                 props.onSelect(props.day);
-                if (!isSelectModifierKey(key)) {
-                    viewModel?.openNote(key, props.day);
+                if (viewModel?.opensNoteOnClick(key)) {
+                    viewModel.openNote(key, props.day);
+                }
+            }}
+            onDoubleClick={(key) => {
+                // The second click of a double click already selected the day; when a
+                // click alone does not open the note, the double click does.
+                if (viewModel && !viewModel.opensNoteOnClick(key)) {
+                    viewModel.openNote(key, props.day);
                 }
             }}
             onOpenInHorizontalSplitViewClick={(key) => {

@@ -32,16 +32,16 @@ export const WeeklyNoteComponent = (props: WeeklyNoteProperties): ReactElement =
                     isSelected={isSelected}
                     isToday={false}
                     hasPeriodNote={hasPeriodicNote}
+                    // The tabs under the calendar show one day, so there is nothing
+                    // for a selected week to show them; the week number is only a way
+                    // to its note, and the selected day stays where it was.
                     onClick={(key) => {
-                        props.onSelect(props.week);
                         viewModel?.openNote(key, props.week);
                     }}
                     onOpenInHorizontalSplitViewClick={(key) => {
-                        props.onSelect(props.week);
                         viewModel?.openNoteInHorizontalSplitView(key, props.week);
                     }}
                     onOpenInVerticalSplitViewClick={(key) => {
-                        props.onSelect(props.week);
                         viewModel?.openNoteInVerticalSplitView(key, props.week);
                     }}
                     onDelete={() => viewModel?.deleteNote(props.week)}

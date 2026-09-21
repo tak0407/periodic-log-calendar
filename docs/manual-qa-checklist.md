@@ -356,6 +356,14 @@ macOS machine with real calendars.
 - [ ] Clearing the plan calendars makes the plan column point at the settings, and leaves the record column readable
 - [ ] Changing the first and last hour changes which rows are drawn
 
+### Clicking a day
+- [ ] A plain click on a day selects it and opens no note; the tabs below show that day
+- [ ] A double-click opens (or creates) the daily note
+- [ ] An `alt`- or `⌘`-click opens the daily note on the first click
+- [ ] With **Open the daily note on click** on, a plain click opens the note and a `shift`-click only selects
+- [ ] With it on, a double-click does not open the note a second time
+- [ ] Clicking a week number, month, quarter or year opens that note and does not change which day the tabs below show
+
 ### Nothing else moved
 - [ ] The Notes tab is the one selected when the calendar view opens
 - [ ] Notes still list, open, open in split views and delete exactly as before

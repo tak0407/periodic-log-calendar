@@ -6,6 +6,7 @@ import {MessageAdapter} from 'src/presentation/adapters/message.adapter';
 import {DayNoteViewModel} from 'src/presentation/contracts/day.view-model';
 import {NoteService} from 'src/presentation/contracts/note-service';
 import {Period} from 'src/domain/models/period.model';
+import {isCreateFileModifierKey, isSelectModifierKey, ModifierKey} from 'src/domain/models/modifier-key';
 
 export class DayPeriodNoteViewModel extends GeneralPeriodNoteViewModel implements DayNoteViewModel {
     constructor(periodService: PeriodService, messageAdapter: MessageAdapter, private readonly noteService: NoteService) {
@@ -15,6 +16,17 @@ export class DayPeriodNoteViewModel extends GeneralPeriodNoteViewModel implement
     public updateSettings(settings: PluginSettings): void {
         super.updateSettings(settings);
         this.settings = settings.dailyNotes;
+    }
+
+    // A plain click selects the day so the tabs below follow it, and the note is
+    // opened deliberately, with the same modifier that creates one. The setting
+    // brings back the original plugin's click, where only a shift-click holds off.
+    public opensNoteOnClick(key: ModifierKey): boolean {
+        if (this.pluginSettings.generalSettings.openDailyNoteOnClick) {
+            return !isSelectModifierKey(key);
+        }
+
+        return isCreateFileModifierKey(key);
     }
 
     public async getNoteCount(period: Period): Promise<number> {

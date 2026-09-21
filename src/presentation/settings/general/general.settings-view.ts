@@ -45,6 +45,19 @@ export class GeneralSettingsView extends SettingsView {
             settings.useModifierKeyToCreateNote = value;
             await settingsRepository.store(settings);
         });
+        this.addBooleanSetting(this.getOpenDailyNoteOnClickSetting(settings.openDailyNoteOnClick), async value => {
+            settings.openDailyNoteOnClick = value;
+            await settingsRepository.store(settings);
+        });
+    }
+
+    private getOpenDailyNoteOnClickSetting(value: boolean): SettingUiModel<boolean> {
+        return <SettingUiModel<boolean>>{
+            name: 'Open the daily note on click',
+            description: 'Off, clicking a day only selects it and the tabs below follow; double-click or use a modifier key to open the note. On, a click opens the note as well.',
+            placeholder: '',
+            value: value,
+        };
     }
 
     private getNotesCreatedOnDateSetting(value: boolean): SettingUiModel<boolean> {

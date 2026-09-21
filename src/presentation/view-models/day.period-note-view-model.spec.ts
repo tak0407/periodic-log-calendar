@@ -392,4 +392,39 @@ describe('DayPeriodNoteViewModel', () => {
             expect(periodService.deleteNote).toHaveBeenCalledWith(period, settings.dailyNotes);
         });
     });
+
+    describe('opensNoteOnClick', () => {
+        const withOpenOnClick = (value: boolean): PluginSettings => <PluginSettings>{
+            ...DEFAULT_PLUGIN_SETTINGS,
+            generalSettings: <GeneralSettings>{...DEFAULT_GENERAL_SETTINGS, openDailyNoteOnClick: value},
+        };
+
+        it('should only select the day on a plain click by default', () => {
+            // Arrange
+            viewModel.updateSettings(withOpenOnClick(false));
+
+            // Act & Assert
+            expect(viewModel.opensNoteOnClick(ModifierKey.None)).toBe(false);
+            expect(viewModel.opensNoteOnClick(ModifierKey.Shift)).toBe(false);
+        });
+
+        it('should open the note on the same modifier that creates one', () => {
+            // Arrange
+            viewModel.updateSettings(withOpenOnClick(false));
+
+            // Act & Assert
+            expect(viewModel.opensNoteOnClick(ModifierKey.Alt)).toBe(true);
+            expect(viewModel.opensNoteOnClick(ModifierKey.Meta)).toBe(true);
+        });
+
+        it('should open the note on any click but a shift-click when the setting asks for it', () => {
+            // Arrange
+            viewModel.updateSettings(withOpenOnClick(true));
+
+            // Act & Assert
+            expect(viewModel.opensNoteOnClick(ModifierKey.None)).toBe(true);
+            expect(viewModel.opensNoteOnClick(ModifierKey.Alt)).toBe(true);
+            expect(viewModel.opensNoteOnClick(ModifierKey.Shift)).toBe(false);
+        });
+    });
 });

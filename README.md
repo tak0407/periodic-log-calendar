@@ -94,9 +94,13 @@ Quickly navigate your vault using a calendar view, this plugin allows you to cre
 such as
 
 - Daily notes
-    - By clicking on a specific date
+    - By double-clicking a date, or clicking it with `alt`/`⌘`. A plain click only
+      selects the day, so the tabs under the calendar follow it; **Settings → General →
+      Open the daily note on click** brings back the original plugin's click, which
+      opens the note as well.
 - Weekly notes
-    - By clicking on the week number
+    - By clicking on the week number. The tabs under the calendar show one day, so
+      this opens the note and leaves the selected day where it was.
 - Monthly notes
     - By clicking on the month name
 - Quarterly notes
@@ -153,7 +157,7 @@ created date of the actual file or use a specific property in the front matter o
 
 The _created on_ time displayed below each note can be customized using the date formatting rules of [`date-fns`](https://date-fns.org/docs/format).
 
-You can always navigate to created notes by pressing the `shift` key and clicking on the date. This will only list the notes created on that date and not open or create the daily note.
+A plain click on a date selects it and lists the notes created on it without opening or creating the daily note. With **Open the daily note on click** turned on, a `shift`-click does the same.
 
 ## 1.4 Commands
 
