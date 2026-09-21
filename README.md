@@ -4,6 +4,27 @@
 
 ---
 
+## What this plugin touches
+
+Community plugins are expected to say plainly what they reach for beyond the vault.
+This one:
+
+- **Reads Apple Calendar's database** at
+  `~/Library/Group Containers/group.com.apple.calendar/Calendar.sqlitedb`, outside the
+  vault, by running the system's `/usr/bin/sqlite3` with `-readonly`. This needs Full
+  Disk Access for Obsidian and happens only when the **기록·계획** tab is open. Nothing
+  is ever written to that file.
+- **Writes to Apple Calendar through the Calendar app**, by running `/usr/bin/osascript`
+  with an AppleScript that makes, changes or deletes one event — only when you drag or
+  edit a plan in the plan tab. macOS asks once whether Obsidian may control Calendar.
+- **Runs only on macOS desktop** (`isDesktopOnly`): the two binaries above are macOS's
+  own, and on any other platform the tab explains that and does nothing.
+- **Sends nothing anywhere.** No network requests, no telemetry, no data leaves the
+  machine. Settings are stored in the plugin's own `data.json` inside the vault.
+
+Everything the calendar view does with notes stays inside the vault, as in the
+original plugin.
+
 ## This is a modified fork
 
 **Periodic Log Calendar** (plugin id `periodic-log-calendar`) is a fork of

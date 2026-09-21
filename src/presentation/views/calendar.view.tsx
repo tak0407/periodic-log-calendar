@@ -1,5 +1,5 @@
 import {ItemView, WorkspaceLeaf} from 'obsidian';
-import {createRoot} from 'react-dom/client';
+import {createRoot, Root} from 'react-dom/client';
 import {StrictMode} from 'react';
 import {CalendarComponent} from 'src/presentation/components/calendar.component';
 import {ContextMenuAdapterContext} from 'src/presentation/context/context-menu-adapter.context';
@@ -18,6 +18,7 @@ export class CalendarView extends ItemView {
     public static VIEW_TYPE = 'periodic-log-calendar';
     private static DISPLAY_TEXT = 'Periodic log calendar';
     private static ICON_NAME = 'calendar';
+    private root: Root | null = null;
 
     constructor(
         leaf: WorkspaceLeaf,
@@ -58,7 +59,8 @@ export class CalendarView extends ItemView {
             timelineViewModel: this.timelineViewModel,
         } as ViewModelsContext;
 
-        createRoot((this.containerEl.children[1])).render(
+        this.root = createRoot(this.containerEl.children[1]);
+        this.root.render(
             <StrictMode>
                 <ContextMenuAdapterContext.Provider value={this.contextMenuAdapter}>
                     <ViewModelsContext value={viewModelsContext}>
@@ -67,5 +69,10 @@ export class CalendarView extends ItemView {
                 </ContextMenuAdapterContext.Provider>
             </StrictMode>,
         );
+    }
+
+    protected override async onClose(): Promise<void> {
+        this.root?.unmount();
+        this.root = null;
     }
 }

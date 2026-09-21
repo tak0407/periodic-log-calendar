@@ -2,9 +2,9 @@
 	"id": "periodic-log-calendar",
 	"name": "Periodic Log Calendar",
 	"version": "0.1.0",
-	"minAppVersion": "0.15.0",
-	"description": "Navigate your Obsidian Vault using a calendar view, and read each day's Apple Calendar log and plan on one time axis.",
-	"author": "tak0407 — fork of Daily note calendar by Bart Kessels",
-	"authorUrl": "https://github.com/tak0407/periodic-log-calendar",
+	"minAppVersion": "1.5.7",
+	"description": "Navigate your vault from a calendar of periodic notes, and see each day's Apple Calendar log and plans on one time axis.",
+	"author": "tak0407",
+	"authorUrl": "https://github.com/tak0407",
 	"isDesktopOnly": true
 }
